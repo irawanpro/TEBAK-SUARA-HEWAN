@@ -457,7 +457,10 @@
         };
 
         // --- 3. PENGATURAN DURASI SUARA DAN JEDA ---
-        const SHORT_SOUND_DURATION = 1500;
+        // Durasi suara hewan saat diklik tanda tanya (dalam milidetik)
+        const ANIMAL_SOUND_DURATION = 6000; 
+        // Durasi jeda setelah umpan balik jawaban (benar/salah) dan suara hewan benar selesai, sebelum pindah ke pertanyaan berikutnya (dalam milidetik)
+        const DELAY_AFTER_FEEDBACK = 2000; 
         const CLICK_EFFECT_DELAY = 500;
 
         // Variabel Status Game (JANGAN UBAH INI KECUALI ANDA PAHAM BETUL)
@@ -552,15 +555,15 @@
                 gameSoundEl.src = currentAnimal.sound;
                 gameSoundEl.play().catch(e => console.error("Error playing animal sound:", e));
 
+                // Mengatur durasi suara hewan
                 setTimeout(() => {
                     gameSoundEl.pause();
                     gameSoundEl.currentTime = 0;
-                }, SHORT_SOUND_DURATION);
-
+                }, ANIMAL_SOUND_DURATION); // Menggunakan durasi 6 detik
             }, CLICK_EFFECT_DELAY);
         }
 
-        function checkAnswer(selectedAnimal, correctAnimal, clickedButton) {
+        async function checkAnswer(selectedAnimal, correctAnimal, clickedButton) {
             if (!choicesEnabled) return;
 
             choicesEnabled = false;
@@ -576,24 +579,26 @@
                 
                 // Play the correct animal's sound first
                 correctAnimalSoundEl.src = correctAnimal.correctSound;
-                correctAnimalSoundEl.play().catch(e => console.error("Error playing correct animal sound:", e));
+                await correctAnimalSoundEl.play().catch(e => console.error("Error playing correct animal sound:", e));
 
                 // Then play the general correct feedback sound
                 feedbackSoundEl.src = gameSounds.correctFeedback;
-                feedbackSoundEl.play().catch(e => console.error("Error playing correct feedback sound:", e));
+                await feedbackSoundEl.play().catch(e => console.error("Error playing correct feedback sound:", e));
                 
                 clickedButton.classList.add('correct-feedback');
                 score++;
                 scoreEl.textContent = score;
                 currentQuestionIndex++;
+
+                // Menunggu DELAY_AFTER_FEEDBACK (2 detik) setelah semua suara selesai sebelum memuat pertanyaan baru
                 setTimeout(() => {
                     loadNewQuestion();
-                }, 2500); // Sesuaikan durasi jeda setelah suara hewan selesai
+                }, DELAY_AFTER_FEEDBACK); 
             } else {
                 feedbackEl.textContent = `Salah. Jawaban yang benar adalah ${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}. 😞`;
                 feedbackEl.classList.add('wrong');
                 feedbackSoundEl.src = gameSounds.wrongFeedback;
-                feedbackSoundEl.play().catch(e => console.error("Error playing wrong feedback sound:", e));
+                await feedbackSoundEl.play().catch(e => console.error("Error playing wrong feedback sound:", e));
                 clickedButton.classList.add('wrong-feedback');
 
                 allButtons.forEach(btn => {
@@ -602,9 +607,11 @@
                     }
                 });
                 currentQuestionIndex++;
+
+                // Menunggu DELAY_AFTER_FEEDBACK (2 detik) setelah umpan balik salah selesai sebelum memuat pertanyaan baru
                 setTimeout(() => {
                     loadNewQuestion();
-                }, 2500);
+                }, DELAY_AFTER_FEEDBACK);
             }
         }
 

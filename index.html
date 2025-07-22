@@ -267,17 +267,6 @@
             font-weight: bold;
             min-height: 1.8em; /* Mencegah layout bergeser */
             transition: opacity 0.3s ease-in-out;
-            /* Gaya tambahan untuk teks jawaban yang benar */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        /* Gaya untuk teks jawaban yang benar */
-        .correct-answer-text {
-            font-size: 0.8em; /* Lebih kecil dari feedback utama */
-            font-style: italic;
-            color: #666;
-            margin-top: 5px;
-            display: block; /* Agar di baris baru */
         }
 
         /* Bagian Hasil Akhir */
@@ -431,6 +420,7 @@
     <audio id="feedbackSound"></audio>
     <audio id="factSound"></audio>
     <audio id="clickEffectSound"></audio>
+    <audio id="correctAnimalSound"></audio>
 
     <script>
         // ====================================================================
@@ -439,59 +429,44 @@
 
         // --- 1. MENAMBAH/MENGUBAH HEWAN (PERTANYAAN) DAN FAKTA ---
         const animals = [
-            { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", fact: "Singa jantan punya surai lebat yang melindunginya saat berkelahi.", factSound: "assets/audio/fakta_singa.mp3" },
-            { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", fact: "Hidung anjing sangat sensitif, bisa mencium bau yang tidak terdeteksi manusia.", factSound: "assets/audio/fakta_anjing.mp3" },
-            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", fact: "Kucing bisa tidur 12 sampai 16 jam sehari!", factSound: "assets/audio/fakta_kucing.mp3" },
-            { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", fact: "Gajah adalah hewan darat terbesar dan menggunakan belalainya untuk minum dan makan.", factSound: "assets/audio/fakta_gajah.mp3" },
-            { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", fact: "Kambing bisa memanjat pohon dan tebing curam dengan sangat lincah.", factSound: "assets/audio/fakta_kambing.mp3" },
-            { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", fact: "Sapi punya empat perut dan menghabiskan sebagian besar waktunya mengunyah.", factSound: "assets/audio/fakta_sapi.mp3" },
-            { name: "ayam", emoji: "🐔", sound: "assets/audio/chicken.mp3", fact: "Ayam berkomunikasi dengan lebih dari 20 suara berbeda!", factSound: "assets/audio/fakta_ayam.mp3" },
-            { name: "kuda", emoji: "🐎", sound: "assets/audio/horse.mp3", fact: "Kuda bisa tidur sambil berdiri, tapi mereka juga butuh berbaring untuk tidur nyenyak.", factSound: "assets/audio/fakta_kuda.mp3" },
-            { name: "monyet", emoji: "🐒", sound: "assets/audio/monkey.mp3", fact: "Monyet menggunakan ekornya untuk menjaga keseimbangan dan bahkan memegang sesuatu.", factSound: "assets/audio/fakta_monyet.mp3" },
-            { name: "burung", emoji: "🐦", sound: "assets/audio/bird.mp3", fact: "Ada lebih dari 10.000 jenis burung di dunia!", factSound: "assets/audio/fakta_burung.mp3" }
+            { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", fact: "Singa jantan punya surai lebat yang melindunginya saat berkelahi.", factSound: "assets/audio/fakta_singa.mp3", correctSound: "assets/audio/yabenar_singa.mp3" },
+            { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", fact: "Hidung anjing sangat sensitif, bisa mencium bau yang tidak terdeteksi manusia.", factSound: "assets/audio/fakta_anjing.mp3", correctSound: "assets/audio/yabenar_anjing.mp3" },
+            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", fact: "Kucing bisa tidur 12 sampai 16 jam sehari!", factSound: "assets/audio/fakta_kucing.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" },
+            { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", fact: "Gajah adalah hewan darat terbesar dan menggunakan belalainya untuk minum dan makan.", factSound: "assets/audio/fakta_gajah.mp3", correctSound: "assets/audio/yabenar_gajah.mp3" },
+            { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", fact: "Kambing bisa memanjat pohon dan tebing curam dengan sangat lincah.", factSound: "assets/audio/fakta_kambing.mp3", correctSound: "assets/audio/yabenar_kambing.mp3" },
+            { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", fact: "Sapi punya empat perut dan menghabiskan sebagian besar waktunya mengunyah.", factSound: "assets/audio/fakta_sapi.mp3", correctSound: "assets/audio/yabenar_sapi.mp3" },
+            { name: "ayam", emoji: "🐔", sound: "assets/audio/chicken.mp3", fact: "Ayam berkomunikasi dengan lebih dari 20 suara berbeda!", factSound: "assets/audio/fakta_ayam.mp3", correctSound: "assets/audio/yabenar_ayam.mp3" },
+            { name: "kuda", emoji: "🐎", sound: "assets/audio/horse.mp3", fact: "Kuda bisa tidur sambil berdiri, tapi mereka juga butuh berbaring untuk tidur nyenyak.", factSound: "assets/audio/fakta_kuda.mp3", correctSound: "assets/audio/yabenar_kuda.mp3" },
+            { name: "monyet", emoji: "🐒", sound: "assets/audio/monkey.mp3", fact: "Monyet menggunakan ekornya untuk menjaga keseimbangan dan bahkan memegang sesuatu.", factSound: "assets/audio/fakta_monyet.mp3", correctSound: "assets/audio/yabenar_monyet.mp3" },
+            { name: "burung", emoji: "🐦", sound: "assets/audio/bird.mp3", fact: "Ada lebih dari 10.000 jenis burung di dunia!", factSound: "assets/audio/fakta_burung.mp3", correctSound: "assets/audio/yabenar_burung.mp3" }
             // CONTOH UNTUK MENAMBAH HEWAN BARU:
-            // , { name: "bebek", emoji: "🦆", sound: "assets/audio/duck.mp3", fact: "Bebek punya kaki berselaput untuk berenang.", factSound: "assets/audio/fakta_bebek.mp3" }
-            // Pastikan Anda memiliki file: assets/audio/duck.mp3 dan assets/audio/fakta_bebek.mp3
+            // , { name: "bebek", emoji: "🦆", sound: "assets/audio/duck.mp3", fact: "Bebek punya kaki berselaput untuk berenang.", factSound: "assets/audio/fakta_bebek.mp3", correctSound: "assets/audio/yabenar_bebek.mp3" }
+            // Pastikan Anda memiliki file: assets/audio/duck.mp3, assets/audio/fakta_bebek.mp3, dan assets/audio/yabenar_bebek.mp3
         ];
 
         // --- 2. MENGATUR JALUR SUARA GAME UTAMA DAN UMPAN BALIK ---
-        // Perbarui: Tambahkan jalur untuk suara umpan balik spesifik per hewan.
         const gameSounds = {
             backgroundMusic: "assets/audio/background_music.mp3",
             clickEffect: "assets/audio/click.mp3",
-            instruction: "assets/audio/instruksi_tebak_suara.mp3",
-            correctFeedback: "assets/audio/benar_sekali.mp3",     // Masih bisa dipakai untuk nada umum benar
-            wrongFeedback: "assets/audio/coba_lagi.mp3",          // Masih bisa dipakai untuk nada umum salah
+            instruction: "assets/audio/instruksi_tebak_suara.mp3", // Suara instruksi
+            correctFeedback: "assets/audio/benar_sekali.mp3",
+            wrongFeedback: "assets/audio/coba_lagi.mp3",
             scoreHigh: "assets/audio/skor_hebat.mp3",
             scoreMedium: "assets/audio/skor_lumayan.mp3",
-            scoreLow: "assets/audio/skor_perlu_latihan.mp3",
-            // Jalur suara umpan balik spesifik per hewan (TAMBAHKAN DI SINI)
-            // PASTIKAN NAMA FILE DI SINI SESUAI DENGAN NAMA FILE AKTUAL ANDA DI FOLDER assets/audio/
-            feedbackCorrectLion: "assets/audio/yabenar_singa.mp3", 
-            feedbackCorrectDog: "assets/audio/yabenar_anjing.mp3",
-            feedbackCorrectCat: "assets/audio/yabenar_kucing.mp3", // <-- Cek lagi nama file ini!
-            feedbackCorrectElephant: "assets/audio/yabenar_gajah.mp3",
-            feedbackCorrectGoat: "assets/audio/yabenar_kambing.mp3",
-            feedbackCorrectCow: "assets/audio/yabenar_sapi.mp3",
-            feedbackCorrectChicken: "assets/audio/yabenar_ayam.mp3",
-            feedbackCorrectHorse: "assets/audio/yabenar_kuda.mp3",
-            feedbackCorrectMonkey: "assets/audio/yabenar_monyet.mp3",
-            feedbackCorrectBird: "assets/audio/yabenar_burung.mp3",
-            feedbackWrongTryAgain: "assets/audio/cobalagi.mp3" 
+            scoreLow: "assets/audio/skor_perlu_latihan.mp3"
         };
 
         // --- 3. PENGATURAN DURASI SUARA DAN JEDA ---
         const SHORT_SOUND_DURATION = 1500;
         const CLICK_EFFECT_DELAY = 500;
-        let FEEDBACK_SOUND_DURATION = 2000; 
 
-        // Variabel Status Game
+        // Variabel Status Game (JANGAN UBAH INI KECUALI ANDA PAHAM BETUL)
         let currentQuestionIndex = 0;
         let score = 0;
         let choicesEnabled = true;
         let answeredQuestions = [];
 
-        // Referensi Elemen HTML
+        // Referensi Elemen HTML (JANGAN UBAH INI KECUALI ANDA MENGUBAH ID HTML)
         const questionMarkDisplayEl = document.getElementById('questionMarkDisplay');
         const backgroundMusicEl = document.getElementById('backgroundMusic');
         const gameSoundEl = document.getElementById('gameSound');
@@ -502,16 +477,20 @@
         const feedbackEl = document.getElementById('feedback');
         const scoreEl = document.getElementById('score');
         const choicesContainerEl = document.getElementById('choicesContainer');
+        // --- Referensi Baru untuk Elemen Instruksi ---
         const instructionsTextEl = document.getElementById('instructionsText'); 
-        const playInstructionSoundBtn = document.getElementById('playInstructionSound');
+        const playInstructionSoundBtn = document.getElementById('playInstructionSound'); // Tombol instruksi
+        // --- Akhir Referensi Baru ---
         const questionInfoEl = document.getElementById('questionInfo');
         const gameScreenEl = document.getElementById('gameScreen');
         const resultsScreenEl = document.getElementById('resultsScreen');
         const finalScoreEl = document.getElementById('finalScore');
         const totalQuestionsEl = document.getElementById('totalQuestions');
         const factsContainerEl = document.getElementById('factsContainer');
+        // Tambahan referensi untuk elemen audio suara hewan yang benar
+        const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
 
-        // Fungsi Utilitas
+        // Fungsi Utilitas (JANGAN UBAH INI KECUALI ANDA TAHU ALASANNYA)
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -527,7 +506,7 @@
             }
 
             choicesEnabled = true;
-            feedbackEl.innerHTML = ''; 
+            feedbackEl.textContent = '';
             feedbackEl.className = '';
 
             const currentAnimal = answeredQuestions[currentQuestionIndex];
@@ -536,8 +515,11 @@
             questionInfoEl.textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${answeredQuestions.length}`;
 
             generateChoices(currentAnimal);
+            // Teks instruksi sekarang ada di elemen p dengan ID 'instructionsText'
+            // instructionsTextEl.textContent = 'Klik tanda tanya untuk mendengar suaranya. Lalu, pilih emoji hewan yang benar!';
         }
 
+        // --- 4. PEMBUATAN PILIHAN JAWABAN (KOTAK/TOMBOL) SECARA DINAMIS ---
         function generateChoices(correctAnimal) {
             choicesContainerEl.innerHTML = '';
 
@@ -578,8 +560,7 @@
             }, CLICK_EFFECT_DELAY);
         }
 
-        // --- FUNGSI checkAnswer() YANG DIMODIFIKASI UNTUK DEBUGGING ---
-        async function checkAnswer(selectedAnimal, correctAnimal, clickedButton) {
+        function checkAnswer(selectedAnimal, correctAnimal, clickedButton) {
             if (!choicesEnabled) return;
 
             choicesEnabled = false;
@@ -589,82 +570,45 @@
                 btn.classList.remove('correct-feedback', 'wrong-feedback');
             });
 
-            let feedbackAudioPath;
-            let feedbackText = '';
-            let correctAnswerText = ''; 
-
             if (selectedAnimal.name === correctAnimal.name) {
-                // Konversi nama hewan menjadi format PascalCase (huruf pertama kapital)
-                const correctAnimalPascalCase = correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1);
+                feedbackEl.textContent = 'Benar! 🎉';
+                feedbackEl.classList.add('correct');
                 
-                // --- DEBUGGING BARU: TAMPILKAN JALUR YANG DICARI ---
-                console.log(`Mencari suara untuk: feedbackCorrect${correctAnimalPascalCase}`);
-                console.log(`Jalur yang diharapkan: ${gameSounds[`feedbackCorrect${correctAnimalPascalCase}`]}`);
-                // --- AKHIR DEBUGGING BARU ---
+                // Play the correct animal's sound first
+                correctAnimalSoundEl.src = correctAnimal.correctSound;
+                correctAnimalSoundEl.play().catch(e => console.error("Error playing correct animal sound:", e));
 
-                feedbackAudioPath = gameSounds[`feedbackCorrect${correctAnimalPascalCase}`];
-                if (!feedbackAudioPath) { 
-                    feedbackAudioPath = gameSounds.correctFeedback;
-                    console.warn(`[FALLBACK] Suara spesifik untuk ${correctAnimal.name} tidak ditemukan. Menggunakan suara umum: ${gameSounds.correctFeedback}`);
-                }
-                feedbackText = 'Benar! 🎉';
-                correctAnswerText = `Itu suara ${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}.`;
+                // Then play the general correct feedback sound
+                feedbackSoundEl.src = gameSounds.correctFeedback;
+                feedbackSoundEl.play().catch(e => console.error("Error playing correct feedback sound:", e));
+                
                 clickedButton.classList.add('correct-feedback');
                 score++;
                 scoreEl.textContent = score;
+                currentQuestionIndex++;
+                setTimeout(() => {
+                    loadNewQuestion();
+                }, 2500); // Sesuaikan durasi jeda setelah suara hewan selesai
             } else {
-                feedbackAudioPath = gameSounds.feedbackWrongTryAgain;
-                if (!feedbackAudioPath) { 
-                    feedbackAudioPath = gameSounds.wrongFeedback;
-                    console.warn(`[FALLBACK] Suara "coba lagi" tidak ditemukan. Menggunakan suara umum: ${gameSounds.wrongFeedback}`);
-                }
-                feedbackText = 'Coba lagi, ya! 😞';
-                correctAnswerText = `Jawaban yang benar adalah ${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}.`;
+                feedbackEl.textContent = `Salah. Jawaban yang benar adalah ${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}. 😞`;
+                feedbackEl.classList.add('wrong');
+                feedbackSoundEl.src = gameSounds.wrongFeedback;
+                feedbackSoundEl.play().catch(e => console.error("Error playing wrong feedback sound:", e));
                 clickedButton.classList.add('wrong-feedback');
-                
+
                 allButtons.forEach(btn => {
                     if (btn.textContent === correctAnimal.emoji) {
                         btn.classList.add('correct-feedback');
                     }
                 });
-            }
-
-            feedbackEl.innerHTML = `
-                <span>${feedbackText}</span>
-                <span class="correct-answer-text">${correctAnswerText}</span>
-            `;
-            feedbackEl.classList.add(selectedAnimal.name === correctAnimal.name ? 'correct' : 'wrong');
-
-            feedbackSoundEl.src = feedbackAudioPath;
-
-            // --- DEBUGGING BARU: PASTIKAN audio di-load dan bisa di-play ---
-            console.log(`Mencoba memutar audio dari: ${feedbackSoundEl.src}`);
-            feedbackSoundEl.load(); // Memuat ulang audio jika diperlukan
-            // --- AKHIR DEBUGGING BARU ---
-
-            try {
-                await feedbackSoundEl.play();
-                // --- DEBUGGING BARU: TAMPILKAN DURASI AUDIO ---
-                feedbackSoundEl.onloadedmetadata = () => {
-                    console.log(`Audio "${feedbackSoundEl.src}" dimuat. Durasi: ${feedbackSoundEl.duration} detik.`);
-                };
-                // --- AKHIR DEBUGGING BARU ---
-            } catch (e) {
-                console.error(`Gagal memutar suara feedback dari ${feedbackAudioPath}:`, e);
-                // Ini akan menangkap error seperti "NotAllowedError: The play() request was interrupted by a new load request."
-                // atau jika ada masalah dengan file itu sendiri.
-            }
-            
-            // Tunggu hingga suara feedback selesai sebelum melanjutkan
-            // Tambahkan jeda ekstra 500ms setelah suara selesai untuk efek
-            const audioDuration = feedbackSoundEl.duration * 1000 || FEEDBACK_SOUND_DURATION; 
-            
-            setTimeout(() => {
                 currentQuestionIndex++;
-                loadNewQuestion();
-            }, audioDuration + 500); 
+                setTimeout(() => {
+                    loadNewQuestion();
+                }, 2500);
+            }
         }
 
+        // --- 5. LOGIKA AKHIR GAME DAN TAMPILAN FAKTA ---
         async function endGame() {
             backgroundMusicEl.pause();
             gameScreenEl.style.display = 'none';
@@ -729,11 +673,23 @@
             loadNewQuestion();
         }
 
+        // Event listener untuk tanda tanya agar bisa diklik untuk memutar suara
         questionMarkDisplayEl.addEventListener('click', playAnimalSoundWithEffect);
 
+        // Event listener untuk slider volume
         volumeSliderEl.addEventListener('input', (event) => {
             backgroundMusicEl.volume = event.target.value;
+            // Pastikan volume untuk semua audio lain juga disesuaikan jika diperlukan
+            gameSoundEl.volume = event.target.value;
+            feedbackSoundEl.volume = event.target.value;
+            factSoundEl.volume = event.target.value;
+            clickEffectSoundEl.volume = event.target.value;
+            correctAnimalSoundEl.volume = event.target.value;
         });
+
+        // =========================================================
+        // PENGATURAN AWAL GAME (Penting untuk Autoplay Musik)
+        // =========================================================
 
         function tryPlayBackgroundMusic() {
             backgroundMusicEl.src = gameSounds.backgroundMusic;
@@ -759,13 +715,19 @@
             document.body.removeEventListener('touchend', enableBackgroundMusic);
         }
 
+        // --- MENGATUR TOMBOL SUARA INSTRUKSI ---
+        // Fungsi untuk memutar suara instruksi
         function playInstructionSound() {
             gameSoundEl.src = gameSounds.instruction;
             gameSoundEl.play().catch(e => console.error("Error playing instruction sound:", e));
         }
 
+        // Event listener untuk tombol suara instruksi
         playInstructionSoundBtn.addEventListener('click', playInstructionSound);
+        // --- Akhir Pengaturan Tombol Suara Instruksi ---
 
+
+        // Inisialisasi game saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
             tryPlayBackgroundMusic();
             

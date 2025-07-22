@@ -458,7 +458,7 @@
 
         // --- 3. PENGATURAN DURASI SUARA DAN JEDA ---
         // Durasi suara hewan saat diklik tanda tanya (dalam milidetik)
-        const ANIMAL_SOUND_DURATION = 3000; 
+        const ANIMAL_SOUND_DURATION = 2000; 
         // Durasi jeda setelah umpan balik jawaban (benar/salah) dan suara hewan benar selesai, sebelum pindah ke pertanyaan berikutnya (dalam milidetik)
         const DELAY_AFTER_FEEDBACK = 4000; 
         const CLICK_EFFECT_DELAY = 500;
@@ -559,7 +559,7 @@
                 setTimeout(() => {
                     gameSoundEl.pause();
                     gameSoundEl.currentTime = 0;
-                }, ANIMAL_SOUND_DURATION); // Menggunakan durasi 3 detik
+                }, ANIMAL_SOUND_DURATION); // Menggunakan durasi 2 detik
             }, CLICK_EFFECT_DELAY);
         }
 

@@ -466,9 +466,10 @@
             scoreMedium: "assets/audio/skor_lumayan.mp3",
             scoreLow: "assets/audio/skor_perlu_latihan.mp3",
             // Jalur suara umpan balik spesifik per hewan (TAMBAHKAN DI SINI)
-            feedbackCorrectLion: "assets/audio/yabenar_singa.mp3", // "Ya benar! Itu suara singa"
+            // PASTIKAN NAMA FILE DI SINI SESUAI DENGAN NAMA FILE AKTUAL ANDA DI FOLDER assets/audio/
+            feedbackCorrectLion: "assets/audio/yabenar_singa.mp3", 
             feedbackCorrectDog: "assets/audio/yabenar_anjing.mp3",
-            feedbackCorrectCat: "assets/audio/yabenar_kucing.mp3",
+            feedbackCorrectCat: "assets/audio/yabenar_kucing.mp3", // <-- Cek lagi nama file ini!
             feedbackCorrectElephant: "assets/audio/yabenar_gajah.mp3",
             feedbackCorrectGoat: "assets/audio/yabenar_kambing.mp3",
             feedbackCorrectCow: "assets/audio/yabenar_sapi.mp3",
@@ -476,25 +477,21 @@
             feedbackCorrectHorse: "assets/audio/yabenar_kuda.mp3",
             feedbackCorrectMonkey: "assets/audio/yabenar_monyet.mp3",
             feedbackCorrectBird: "assets/audio/yabenar_burung.mp3",
-            feedbackWrongTryAgain: "assets/audio/cobalagi.mp3" // "Coba lagi, ya!"
-            // Jika Anda menambahkan hewan baru, pastikan juga menambahkan jalur suara umpan balik di sini.
-            // Contoh: feedbackCorrectDuck: "assets/audio/yabenar_bebek.mp3"
+            feedbackWrongTryAgain: "assets/audio/cobalagi.mp3" 
         };
 
         // --- 3. PENGATURAN DURASI SUARA DAN JEDA ---
         const SHORT_SOUND_DURATION = 1500;
         const CLICK_EFFECT_DELAY = 500;
-        // Durasi jeda setelah umpan balik jawaban selesai (dalam milidetik)
-        // Ini akan dihitung dari durasi file audio umpan balik.
-        let FEEDBACK_SOUND_DURATION = 2000; // Default, akan diupdate secara dinamis
+        let FEEDBACK_SOUND_DURATION = 2000; 
 
-        // Variabel Status Game (JANGAN UBAH INI KECUALI ANDA PAHAM BETUL)
+        // Variabel Status Game
         let currentQuestionIndex = 0;
         let score = 0;
         let choicesEnabled = true;
         let answeredQuestions = [];
 
-        // Referensi Elemen HTML (JANGAN UBAH INI KECUALI ANDA MENGUBAH ID HTML)
+        // Referensi Elemen HTML
         const questionMarkDisplayEl = document.getElementById('questionMarkDisplay');
         const backgroundMusicEl = document.getElementById('backgroundMusic');
         const gameSoundEl = document.getElementById('gameSound');
@@ -514,7 +511,7 @@
         const totalQuestionsEl = document.getElementById('totalQuestions');
         const factsContainerEl = document.getElementById('factsContainer');
 
-        // Fungsi Utilitas (JANGAN UBAH INI KECUALI ANDA TAHU ALASANNYA)
+        // Fungsi Utilitas
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -530,7 +527,7 @@
             }
 
             choicesEnabled = true;
-            feedbackEl.innerHTML = ''; // Ubah menjadi innerHTML karena akan ada teks dan mungkin span
+            feedbackEl.innerHTML = ''; 
             feedbackEl.className = '';
 
             const currentAnimal = answeredQuestions[currentQuestionIndex];
@@ -541,7 +538,6 @@
             generateChoices(currentAnimal);
         }
 
-        // --- 4. PEMBUATAN PILIHAN JAWABAN (KOTAK/TOMBOL) SECARA DINAMIS ---
         function generateChoices(correctAnimal) {
             choicesContainerEl.innerHTML = '';
 
@@ -582,7 +578,7 @@
             }, CLICK_EFFECT_DELAY);
         }
 
-        // --- 6. FUNGSI checkAnswer() YANG DIMODIFIKASI UNTUK UMPAN BALIK SPESIFIK ---
+        // --- FUNGSI checkAnswer() YANG DIMODIFIKASI UNTUK DEBUGGING ---
         async function checkAnswer(selectedAnimal, correctAnimal, clickedButton) {
             if (!choicesEnabled) return;
 
@@ -595,14 +591,21 @@
 
             let feedbackAudioPath;
             let feedbackText = '';
-            let correctAnswerText = ''; // Teks kecil untuk jawaban yang benar
+            let correctAnswerText = ''; 
 
             if (selectedAnimal.name === correctAnimal.name) {
-                // Suara umpan balik benar spesifik
-                feedbackAudioPath = gameSounds[`feedbackCorrect${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}`];
-                if (!feedbackAudioPath) { // Fallback jika suara spesifik tidak ada
+                // Konversi nama hewan menjadi format PascalCase (huruf pertama kapital)
+                const correctAnimalPascalCase = correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1);
+                
+                // --- DEBUGGING BARU: TAMPILKAN JALUR YANG DICARI ---
+                console.log(`Mencari suara untuk: feedbackCorrect${correctAnimalPascalCase}`);
+                console.log(`Jalur yang diharapkan: ${gameSounds[`feedbackCorrect${correctAnimalPascalCase}`]}`);
+                // --- AKHIR DEBUGGING BARU ---
+
+                feedbackAudioPath = gameSounds[`feedbackCorrect${correctAnimalPascalCase}`];
+                if (!feedbackAudioPath) { 
                     feedbackAudioPath = gameSounds.correctFeedback;
-                    console.warn(`Sound for ${correctAnimal.name} not found. Using general correct feedback.`);
+                    console.warn(`[FALLBACK] Suara spesifik untuk ${correctAnimal.name} tidak ditemukan. Menggunakan suara umum: ${gameSounds.correctFeedback}`);
                 }
                 feedbackText = 'Benar! 🎉';
                 correctAnswerText = `Itu suara ${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}.`;
@@ -610,17 +613,15 @@
                 score++;
                 scoreEl.textContent = score;
             } else {
-                // Suara umpan balik salah
                 feedbackAudioPath = gameSounds.feedbackWrongTryAgain;
-                if (!feedbackAudioPath) { // Fallback jika suara spesifik tidak ada
+                if (!feedbackAudioPath) { 
                     feedbackAudioPath = gameSounds.wrongFeedback;
-                    console.warn(`Sound for wrong answer not found. Using general wrong feedback.`);
+                    console.warn(`[FALLBACK] Suara "coba lagi" tidak ditemukan. Menggunakan suara umum: ${gameSounds.wrongFeedback}`);
                 }
                 feedbackText = 'Coba lagi, ya! 😞';
                 correctAnswerText = `Jawaban yang benar adalah ${correctAnimal.name.charAt(0).toUpperCase() + correctAnimal.name.slice(1)}.`;
                 clickedButton.classList.add('wrong-feedback');
                 
-                // Tampilkan jawaban yang benar juga
                 allButtons.forEach(btn => {
                     if (btn.textContent === correctAnimal.emoji) {
                         btn.classList.add('correct-feedback');
@@ -628,7 +629,6 @@
                 });
             }
 
-            // Atur teks feedback (utama + teks jawaban kecil)
             feedbackEl.innerHTML = `
                 <span>${feedbackText}</span>
                 <span class="correct-answer-text">${correctAnswerText}</span>
@@ -636,20 +636,35 @@
             feedbackEl.classList.add(selectedAnimal.name === correctAnimal.name ? 'correct' : 'wrong');
 
             feedbackSoundEl.src = feedbackAudioPath;
-            await feedbackSoundEl.play().catch(e => console.error("Error playing feedback sound:", e));
 
+            // --- DEBUGGING BARU: PASTIKAN audio di-load dan bisa di-play ---
+            console.log(`Mencoba memutar audio dari: ${feedbackSoundEl.src}`);
+            feedbackSoundEl.load(); // Memuat ulang audio jika diperlukan
+            // --- AKHIR DEBUGGING BARU ---
+
+            try {
+                await feedbackSoundEl.play();
+                // --- DEBUGGING BARU: TAMPILKAN DURASI AUDIO ---
+                feedbackSoundEl.onloadedmetadata = () => {
+                    console.log(`Audio "${feedbackSoundEl.src}" dimuat. Durasi: ${feedbackSoundEl.duration} detik.`);
+                };
+                // --- AKHIR DEBUGGING BARU ---
+            } catch (e) {
+                console.error(`Gagal memutar suara feedback dari ${feedbackAudioPath}:`, e);
+                // Ini akan menangkap error seperti "NotAllowedError: The play() request was interrupted by a new load request."
+                // atau jika ada masalah dengan file itu sendiri.
+            }
+            
             // Tunggu hingga suara feedback selesai sebelum melanjutkan
             // Tambahkan jeda ekstra 500ms setelah suara selesai untuk efek
-            const audioDuration = feedbackSoundEl.duration * 1000 || FEEDBACK_SOUND_DURATION; // Gunakan durasi aktual atau default
+            const audioDuration = feedbackSoundEl.duration * 1000 || FEEDBACK_SOUND_DURATION; 
             
             setTimeout(() => {
                 currentQuestionIndex++;
                 loadNewQuestion();
-            }, audioDuration + 500); // Jeda total: durasi suara + 0.5 detik
+            }, audioDuration + 500); 
         }
 
-
-        // --- 5. LOGIKA AKHIR GAME DAN TAMPILAN FAKTA ---
         async function endGame() {
             backgroundMusicEl.pause();
             gameScreenEl.style.display = 'none';
@@ -714,17 +729,11 @@
             loadNewQuestion();
         }
 
-        // Event listener untuk tanda tanya agar bisa diklik untuk memutar suara
         questionMarkDisplayEl.addEventListener('click', playAnimalSoundWithEffect);
 
-        // Event listener untuk slider volume
         volumeSliderEl.addEventListener('input', (event) => {
             backgroundMusicEl.volume = event.target.value;
         });
-
-        // =========================================================
-        // PENGATURAN AWAL GAME (Penting untuk Autoplay Musik)
-        // =========================================================
 
         function tryPlayBackgroundMusic() {
             backgroundMusicEl.src = gameSounds.backgroundMusic;
@@ -750,7 +759,6 @@
             document.body.removeEventListener('touchend', enableBackgroundMusic);
         }
 
-        // --- MENGATUR TOMBOL SUARA INSTRUKSI ---
         function playInstructionSound() {
             gameSoundEl.src = gameSounds.instruction;
             gameSoundEl.play().catch(e => console.error("Error playing instruction sound:", e));
@@ -758,7 +766,6 @@
 
         playInstructionSoundBtn.addEventListener('click', playInstructionSound);
 
-        // Inisialisasi game saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
             tryPlayBackgroundMusic();
             

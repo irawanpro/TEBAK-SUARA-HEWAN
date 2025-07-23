@@ -377,6 +377,52 @@
                 gap: 5px;
             }
         }
+
+        /* CSS Baru untuk Scoreboard dan Overlay */
+        .scoreboard-container {
+            display: none; /* Sembunyikan secara default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Overlay gelap */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20; /* Pastikan di atas semua elemen game */
+        }
+
+        .scoreboard-content {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transform: scale(0.8);
+            animation: bounceIn 0.8s ease-out forwards;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .scoreboard-content h2 {
+            font-family: 'Fredoka One', cursive;
+            color: #FF6347;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .scoreboard-content p {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2em;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+
+        .scoreboard-content p span {
+            font-size: 1.5em;
+            color: #1E90FF;
+        }
     </style>
 </head>
 <body>
@@ -402,10 +448,15 @@
             <div id="feedback"></div>
         </div>
 
+        <div id="scoreboardScreen" class="scoreboard-container">
+            <div class="scoreboard-content">
+                <h2>Game Selesai!</h2>
+                <p>Skor Akhir Anda: <span id="scoreboardFinalScore">0</span> dari <span id="scoreboardTotalQuestions">0</span></p>
+                <p id="scoreFeedbackText"></p>
+            </div>
+        </div>
         <div id="resultsScreen" class="results-container">
-            <h2>🎉 Permainan Selesai! 🎉</h2>
-            <p class="score-display">Skor Akhir Anda: <span id="finalScore">0</span> dari <span id="totalQuestions">0</span></p>
-            <h3>Fakta Menarik tentang Hewan:</h3>
+            <h2>🎉 Fakta Menarik tentang Hewan! 🎉</h2>
             <div id="factsContainer">
                 </div>
             <div class="button-group">
@@ -421,6 +472,7 @@
     <audio id="factSound"></audio>
     <audio id="clickEffectSound"></audio>
     <audio id="correctAnimalSound"></audio>
+    <audio id="scoreEvaluationSound"></audio>
 
     <script>
         // ====================================================================
@@ -462,6 +514,8 @@
         // Durasi jeda setelah umpan balik jawaban (benar/salah) dan suara hewan benar selesai, sebelum pindah ke pertanyaan berikutnya (dalam milidetik)
         const DELAY_AFTER_FEEDBACK = 4000; 
         const CLICK_EFFECT_DELAY = 500;
+        // Durasi jeda untuk menampilkan scoreboard (dalam milidetik)
+        const SCOREBOARD_DISPLAY_DELAY = 3000; // Misalnya 3 detik
 
         // Variabel Status Game (JANGAN UBAH INI KECUALI ANDA PAHAM BETUL)
         let currentQuestionIndex = 0;
@@ -487,11 +541,22 @@
         const questionInfoEl = document.getElementById('questionInfo');
         const gameScreenEl = document.getElementById('gameScreen');
         const resultsScreenEl = document.getElementById('resultsScreen');
-        const finalScoreEl = document.getElementById('finalScore');
-        const totalQuestionsEl = document.getElementById('totalQuestions');
+        // Elemen baru untuk scoreboard
+        const scoreboardScreenEl = document.getElementById('scoreboardScreen');
+        const scoreboardFinalScoreEl = document.getElementById('scoreboardFinalScore');
+        const scoreboardTotalQuestionsEl = document.getElementById('scoreboardTotalQuestions');
+        const scoreFeedbackTextEl = document.getElementById('scoreFeedbackText');
+        // Akhir elemen baru untuk scoreboard
+
+        const finalScoreEl = document.getElementById('finalScore'); // Ini akan dihapus atau diganti
+        const totalQuestionsEl = document.getElementById('totalQuestions'); // Ini akan dihapus atau diganti
+
         const factsContainerEl = document.getElementById('factsContainer');
         // Tambahan referensi untuk elemen audio suara hewan yang benar
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
+        // Referensi audio untuk suara penilaian skor
+        const scoreEvaluationSoundEl = document.getElementById('scoreEvaluationSound');
+
 
         // Fungsi Utilitas (JANGAN UBAH INI KECUALI ANDA TAHU ALASANNYA)
         function shuffleArray(array) {
@@ -504,7 +569,7 @@
 
         function loadNewQuestion() {
             if (currentQuestionIndex >= answeredQuestions.length) {
-                endGame();
+                displayScoreboard(); // Panggil fungsi untuk menampilkan scoreboard
                 return;
             }
 
@@ -615,31 +680,46 @@
             }
         }
 
-        // --- 5. LOGIKA AKHIR GAME DAN TAMPILAN FAKTA ---
-        async function endGame() {
+        // Fungsi baru untuk menampilkan scoreboard
+        async function displayScoreboard() {
             backgroundMusicEl.pause();
             gameScreenEl.style.display = 'none';
-            resultsScreenEl.style.display = 'block';
+            scoreboardScreenEl.style.display = 'flex'; // Tampilkan scoreboard
 
-            finalScoreEl.textContent = score;
-            totalQuestionsEl.textContent = animals.length;
+            scoreboardFinalScoreEl.textContent = score;
+            scoreboardTotalQuestionsEl.textContent = animals.length;
 
-            let scoreFeedbackSound;
+            let scoreFeedbackSoundPath;
             let scoreText;
             if (score === animals.length) {
-                scoreFeedbackSound = gameSounds.scoreHigh;
+                scoreFeedbackSoundPath = gameSounds.scoreHigh;
                 scoreText = `Hebat sekali! Kamu berhasil menjawab semua pertanyaan dengan benar!`;
             } else if (score >= animals.length / 2) {
-                scoreFeedbackSound = gameSounds.scoreMedium;
+                scoreFeedbackSoundPath = gameSounds.scoreMedium;
                 scoreText = `Kerja bagus! Kamu berhasil menjawab ${score} pertanyaan dengan benar. Terus berlatih ya!`;
             } else {
-                scoreFeedbackSound = gameSounds.scoreLow;
+                scoreFeedbackSoundPath = gameSounds.scoreLow;
                 scoreText = `Jangan menyerah! Kamu sudah berusaha, mari kita belajar lagi.`;
             }
-            feedbackEl.textContent = scoreText;
-            feedbackEl.className = 'feedback-final-score';
-            gameSoundEl.src = scoreFeedbackSound;
-            await gameSoundEl.play().catch(e => console.error("Error playing score sound:", e));
+            scoreFeedbackTextEl.textContent = scoreText; // Update teks umpan balik skor
+
+            // Putar suara penilaian skor
+            scoreEvaluationSoundEl.src = scoreFeedbackSoundPath;
+            await scoreEvaluationSoundEl.play().catch(e => console.error("Error playing score evaluation sound:", e));
+
+            // Setelah suara penilaian skor selesai, baru lanjutkan ke endGame
+            scoreEvaluationSoundEl.onended = () => {
+                setTimeout(endGame, SCOREBOARD_DISPLAY_DELAY); // Panggil endGame setelah jeda
+            };
+        }
+
+        // --- 5. LOGIKA AKHIR GAME DAN TAMPILAN FAKTA ---
+        function endGame() {
+            scoreboardScreenEl.style.display = 'none'; // Sembunyikan scoreboard
+            resultsScreenEl.style.display = 'block'; // Tampilkan layar fakta
+
+            // finalScoreEl.textContent = score; // Ini sudah tidak digunakan karena skor ditampilkan di scoreboard
+            // totalQuestionsEl.textContent = animals.length; // Ini juga sudah tidak digunakan
 
             factsContainerEl.innerHTML = '';
             const shuffledFacts = shuffleArray([...animals]);
@@ -692,6 +772,7 @@
             factSoundEl.volume = event.target.value;
             clickEffectSoundEl.volume = event.target.value;
             correctAnimalSoundEl.volume = event.target.value;
+            scoreEvaluationSoundEl.volume = event.target.value; // Atur volume untuk suara penilaian skor
         });
 
         // =========================================================

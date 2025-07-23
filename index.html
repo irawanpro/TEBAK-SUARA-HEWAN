@@ -387,9 +387,8 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.7); /* Overlay gelap */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; /* Menggunakan flex untuk centering */
+            align-items: center; /* Menggunakan flex untuk centering */
             z-index: 20; /* Pastikan di atas semua elemen game */
         }
 
@@ -483,7 +482,7 @@
         const animals = [
             { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", fact: "Singa jantan punya surai lebat yang melindunginya saat berkelahi.", factSound: "assets/audio/fakta_singa.mp3", correctSound: "assets/audio/yabenar_singa.mp3" },
             { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", fact: "Hidung anjing sangat sensitif, bisa mencium bau yang tidak terdeteksi manusia.", factSound: "assets/audio/fakta_anjing.mp3", correctSound: "assets/audio/yabenar_anjing.mp3" },
-            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", fact: "Kucing bisa tidur 12 sampai 16 jam sehari!", factSound: "assets/audio/fakta_kucing.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" },
+            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mpaj", fact: "Kucing bisa tidur 12 sampai 16 jam sehari!", factSound: "assets/audio/fakta_kucing.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" },
             { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", fact: "Gajah adalah hewan darat terbesar dan menggunakan belalainya untuk minum dan makan.", factSound: "assets/audio/fakta_gajah.mp3", correctSound: "assets/audio/yabenar_gajah.mp3" },
             { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", fact: "Kambing bisa memanjat pohon dan tebing curam dengan sangat lincah.", factSound: "assets/audio/fakta_kambing.mp3", correctSound: "assets/audio/yabenar_kambing.mp3" },
             { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", fact: "Sapi punya empat perut dan menghabiskan sebagian besar waktunya mengunyah.", factSound: "assets/audio/fakta_sapi.mp3", correctSound: "assets/audio/yabenar_sapi.mp3" },
@@ -515,7 +514,9 @@
         const DELAY_AFTER_FEEDBACK = 4000; 
         const CLICK_EFFECT_DELAY = 500;
         // Durasi jeda untuk menampilkan scoreboard (dalam milidetik)
-        const SCOREBOARD_DISPLAY_DELAY = 3000; // Misalnya 3 detik
+        // Ini adalah durasi MINIMAL scoreboard akan tampil SETELAH suara penilaian selesai.
+        // Jika suara lebih panjang dari ini, maka akan menunggu suara selesai.
+        const MIN_SCOREBOARD_DISPLAY_DURATION = 2000; 
 
         // Variabel Status Game (JANGAN UBAH INI KECUALI ANDA PAHAM BETUL)
         let currentQuestionIndex = 0;
@@ -547,10 +548,6 @@
         const scoreboardTotalQuestionsEl = document.getElementById('scoreboardTotalQuestions');
         const scoreFeedbackTextEl = document.getElementById('scoreFeedbackText');
         // Akhir elemen baru untuk scoreboard
-
-        const finalScoreEl = document.getElementById('finalScore'); // Ini akan dihapus atau diganti
-        const totalQuestionsEl = document.getElementById('totalQuestions'); // Ini akan dihapus atau diganti
-
         const factsContainerEl = document.getElementById('factsContainer');
         // Tambahan referensi untuk elemen audio suara hewan yang benar
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
@@ -569,7 +566,8 @@
 
         function loadNewQuestion() {
             if (currentQuestionIndex >= answeredQuestions.length) {
-                displayScoreboard(); // Panggil fungsi untuk menampilkan scoreboard
+                // Semua soal sudah terjawab, tampilkan scoreboard
+                displayScoreboard(); 
                 return;
             }
 
@@ -583,8 +581,6 @@
             questionInfoEl.textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${answeredQuestions.length}`;
 
             generateChoices(currentAnimal);
-            // Teks instruksi sekarang ada di elemen p dengan ID 'instructionsText'
-            // instructionsTextEl.textContent = 'Klik tanda tanya untuk mendengar suaranya. Lalu, pilih emoji hewan yang benar!';
         }
 
         // --- 4. PEMBUATAN PILIHAN JAWABAN (KOTAK/TOMBOL) SECARA DINAMIS ---
@@ -680,10 +676,10 @@
             }
         }
 
-        // Fungsi baru untuk menampilkan scoreboard
+        // Fungsi untuk menampilkan scoreboard setelah semua soal terjawab
         async function displayScoreboard() {
             backgroundMusicEl.pause();
-            gameScreenEl.style.display = 'none';
+            gameScreenEl.style.display = 'none'; // Sembunyikan layar game
             scoreboardScreenEl.style.display = 'flex'; // Tampilkan scoreboard
 
             scoreboardFinalScoreEl.textContent = score;
@@ -701,25 +697,36 @@
                 scoreFeedbackSoundPath = gameSounds.scoreLow;
                 scoreText = `Jangan menyerah! Kamu sudah berusaha, mari kita belajar lagi.`;
             }
-            scoreFeedbackTextEl.textContent = scoreText; // Update teks umpan balik skor
+            scoreFeedbackTextEl.textContent = scoreText; 
 
             // Putar suara penilaian skor
             scoreEvaluationSoundEl.src = scoreFeedbackSoundPath;
             await scoreEvaluationSoundEl.play().catch(e => console.error("Error playing score evaluation sound:", e));
 
-            // Setelah suara penilaian skor selesai, baru lanjutkan ke endGame
+            // Menentukan durasi jeda setelah suara penilaian skor selesai
+            // Pastikan jeda minimal terpenuhi, atau tunggu sampai suara selesai jika lebih panjang
+            const soundDuration = scoreEvaluationSoundEl.duration * 1000; // konversi detik ke milidetik
+            const delayAfterSound = Math.max(MIN_SCOREBOARD_DISPLAY_DURATION, soundDuration);
+
+            // Setelah suara penilaian skor selesai diputar, baru lanjutkan ke endGame
             scoreEvaluationSoundEl.onended = () => {
-                setTimeout(endGame, SCOREBOARD_DISPLAY_DELAY); // Panggil endGame setelah jeda
+                setTimeout(endGame, MIN_SCOREBOARD_DISPLAY_DURATION); 
             };
+            // Tambahkan juga timeout jika suara terlalu pendek (untuk memastikan MIN_SCOREBOARD_DISPLAY_DURATION)
+            // Ini penting jika onended tidak dipanggil atau suara sangat singkat
+            if (soundDuration < MIN_SCOREBOARD_DISPLAY_DURATION) {
+                 setTimeout(() => {
+                    if (scoreEvaluationSoundEl.paused) { // Hanya panggil endGame jika sound sudah berhenti
+                        endGame();
+                    }
+                 }, MIN_SCOREBOARD_DISPLAY_DURATION - soundDuration);
+            }
         }
 
         // --- 5. LOGIKA AKHIR GAME DAN TAMPILAN FAKTA ---
         function endGame() {
             scoreboardScreenEl.style.display = 'none'; // Sembunyikan scoreboard
             resultsScreenEl.style.display = 'block'; // Tampilkan layar fakta
-
-            // finalScoreEl.textContent = score; // Ini sudah tidak digunakan karena skor ditampilkan di scoreboard
-            // totalQuestionsEl.textContent = animals.length; // Ini juga sudah tidak digunakan
 
             factsContainerEl.innerHTML = '';
             const shuffledFacts = shuffleArray([...animals]);
@@ -753,6 +760,7 @@
             answeredQuestions = shuffleArray([...animals]);
             gameScreenEl.style.display = 'block';
             resultsScreenEl.style.display = 'none';
+            scoreboardScreenEl.style.display = 'none'; // Pastikan scoreboard juga tersembunyi
             
             backgroundMusicEl.play().catch(e => {
                 console.error("Autoplay of background music failed on playAgain:", e);
@@ -766,13 +774,12 @@
         // Event listener untuk slider volume
         volumeSliderEl.addEventListener('input', (event) => {
             backgroundMusicEl.volume = event.target.value;
-            // Pastikan volume untuk semua audio lain juga disesuaikan jika diperlukan
             gameSoundEl.volume = event.target.value;
             feedbackSoundEl.volume = event.target.value;
             factSoundEl.volume = event.target.value;
             clickEffectSoundEl.volume = event.target.value;
             correctAnimalSoundEl.volume = event.target.value;
-            scoreEvaluationSoundEl.volume = event.target.value; // Atur volume untuk suara penilaian skor
+            scoreEvaluationSoundEl.volume = event.target.value; 
         });
 
         // =========================================================

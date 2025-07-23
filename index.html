@@ -485,14 +485,15 @@
         <div id="gameOverScreen" style="display: none;">
             <div class="game-over-message" id="gameOverText">GAME SELESAI</div>
             <div class="final-score-text" id="finalScoreText"></div>
-            <button class="main-button" id="showFactsButton">FAKTA MENARIK</button> </div>
+            <button class="main-button" id="showFactsButton">FAKTA MENARIK</button>
+        </div>
 
         <div id="factsScreen" style="display: none;">
             <h2 class="facts-title">FAKTA MENARIK 🧠</h2>
             <div id="factsContent">
                 </div>
             <div class="fact-navigation">
-                <button class="main-button" id="nextFactButton" style="display: none;">NEXT</button>
+                <button class="main-button" id="previousFactButton" style="display: none;">KEMBALI</button> <button class="main-button" id="nextFactButton" style="display: none;">NEXT</button>
                 <button class="main-button" id="playAgainButton" style="display: none;">Main Lagi!</button>
             </div>
         </div>
@@ -504,7 +505,9 @@
     <audio id="feedbackSound"></audio>
     <audio id="clickEffectSound"></audio>
     <audio id="correctAnimalSound"></audio>
-    <audio id="factSoundPlayer"></audio> <script>
+    <audio id="factSoundPlayer"></audio>
+
+    <script>
         // ====================================================================
         // PANDUAN PEMELIHARAAN KODE
         // ====================================================================
@@ -571,10 +574,11 @@
         const showFactsButton = document.getElementById('showFactsButton');
         const factsScreenEl = document.getElementById('factsScreen');
         const factsContentEl = document.getElementById('factsContent');
+        const previousFactButton = document.getElementById('previousFactButton'); // Tombol KEMBALI baru
         const nextFactButton = document.getElementById('nextFactButton');
         const playAgainButton = document.getElementById('playAgainButton');
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
-        const factSoundPlayerEl = document.getElementById('factSoundPlayer'); // Audio player baru
+        const factSoundPlayerEl = document.getElementById('factSoundPlayer');
 
         // Fungsi Utilitas
         function shuffleArray(array) {
@@ -743,9 +747,15 @@
             });
 
 
-            // Tentukan visibilitas tombol NEXT dan Main Lagi
+            // Tentukan visibilitas tombol NEXT, KEMBALI, dan Main Lagi
+            if (currentFactPageIndex > 0) {
+                previousFactButton.style.display = 'inline-block'; // Tampilkan tombol KEMBALI jika bukan halaman pertama
+            } else {
+                previousFactButton.style.display = 'none'; // Sembunyikan KEMBALI jika di halaman pertama
+            }
+
             if (endIndex < shuffledFacts.length) {
-                nextFactButton.style.display = 'inline-block'; // Tampilkan tombol NEXT
+                nextFactButton.style.display = 'inline-block'; // Tampilkan tombol NEXT jika masih ada fakta
                 playAgainButton.style.display = 'none'; // Sembunyikan Main Lagi
             } else {
                 nextFactButton.style.display = 'none'; // Sembunyikan NEXT jika sudah habis
@@ -758,6 +768,15 @@
 
         function nextFacts() {
             currentFactPageIndex++;
+            loadFactsPage();
+        }
+
+        function previousFacts() { // Fungsi baru untuk tombol KEMBALI
+            currentFactPageIndex--;
+            // Pastikan indeks tidak kurang dari 0
+            if (currentFactPageIndex < 0) {
+                currentFactPageIndex = 0;
+            }
             loadFactsPage();
         }
 
@@ -801,10 +820,11 @@
             feedbackSoundEl.volume = event.target.value;
             clickEffectSoundEl.volume = event.target.value;
             correctAnimalSoundEl.volume = event.target.value;
-            factSoundPlayerEl.volume = event.target.value; // Atur volume untuk suara fakta
+            factSoundPlayerEl.volume = event.target.value;
         });
         playInstructionSoundBtn.addEventListener('click', playInstructionSound);
         showFactsButton.addEventListener('click', showFacts);
+        previousFactButton.addEventListener('click', previousFacts); // Event listener tombol KEMBALI
         nextFactButton.addEventListener('click', nextFacts);
         playAgainButton.addEventListener('click', playAgain);
 

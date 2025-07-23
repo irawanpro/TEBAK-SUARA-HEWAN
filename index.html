@@ -274,9 +274,18 @@
             color: #FF6347; /* Warna merah seperti judul utama */
             font-size: 3.5em; /* Ukuran lebih besar agar menarik */
             margin-top: 50px; /* Jarak dari atas */
-            margin-bottom: 30px; /* Jarak dari tombol */
             text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.15); /* Bayangan teks */
             animation: fadeInScale 1s ease-out forwards; /* Animasi muncul */
+        }
+
+        /* Gaya untuk teks Skor Akhir */
+        .final-score-text {
+            font-family: 'Fredoka One', cursive; /* Sesuaikan dengan tema */
+            color: #4CAF50; /* Warna hijau untuk skor, atau bisa disesuaikan */
+            font-size: 1.8em; /* Ukuran yang pas, di bawah "GAME SELESAI" */
+            margin-top: 20px; /* Jarak dari "GAME SELESAI" */
+            margin-bottom: 30px; /* Jarak dari tombol "Main Lagi" */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         @keyframes fadeInScale {
@@ -339,6 +348,9 @@
             .game-over-message {
                 font-size: 2.5em; /* Lebih kecil di mobile */
             }
+            .final-score-text {
+                font-size: 1.4em; /* Lebih kecil di mobile */
+            }
             .main-button {
                 font-size: 1.2em; /* Lebih kecil di mobile */
                 padding: 12px 25px;
@@ -371,7 +383,7 @@
 
         <div id="gameOverScreen" style="display: none;">
             <div class="game-over-message" id="gameOverText">GAME SELESAI</div>
-            <button class="main-button" onclick="playAgain()">Main Lagi!</button>
+            <div class="final-score-text" id="finalScoreText"></div> <button class="main-button" onclick="playAgain()">Main Lagi!</button>
         </div>
 
     </div>
@@ -387,11 +399,11 @@
         // PANDUAN PEMELIHARAAN KODE
         // ====================================================================
 
-        // --- 1. MENAMBAH/MENGUBAH HEWAN (PERTANYAN) ---
+        // --- 1. MENAMBAH/MENGUBAH HEWAN (PERTANYAAN) ---
         const animals = [
             { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", correctSound: "assets/audio/yabenar_singa.mp3" },
             { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", correctSound: "assets/audio/yabenar_anjing.mp3" },
-            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp2", correctSound: "assets/audio/yabenar_kucing.mp3" }, // <-- Perhatikan: cat.mp2? Harusnya .mp3
+            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" }, // <-- Pastikan ini .mp3
             { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", correctSound: "assets/audio/yabenar_gajah.mp3" },
             { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", correctSound: "assets/audio/yabenar_kambing.mp3" },
             { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", correctSound: "assets/audio/yabenar_sapi.mp3" },
@@ -438,8 +450,9 @@
         const playInstructionSoundBtn = document.getElementById('playInstructionSound'); 
         const questionInfoEl = document.getElementById('questionInfo');
         const gameScreenEl = document.getElementById('gameScreen');
-        const gameOverScreenEl = document.getElementById('gameOverScreen'); // Elemen baru
-        const gameOverTextEl = document.getElementById('gameOverText'); // Elemen baru
+        const gameOverScreenEl = document.getElementById('gameOverScreen');
+        const gameOverTextEl = document.getElementById('gameOverText');
+        const finalScoreTextEl = document.getElementById('finalScoreText'); // Referensi elemen baru
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
 
 
@@ -561,6 +574,9 @@
             gameScreenEl.style.display = 'none'; // Sembunyikan layar game
             gameOverScreenEl.style.display = 'block'; // Tampilkan layar game over baru
             
+            // Set teks skor akhir
+            finalScoreTextEl.textContent = `Skor kamu ${score} dari ${animals.length} soal`;
+            
             // Musik latar belakang akan tetap berjalan karena kita tidak mempause-nya di sini
             // backgroundMusicEl.play() // Tidak perlu dipanggil, karena sudah loop dan tidak dipause
         }
@@ -580,7 +596,7 @@
             questionMarkDisplayEl.style.display = 'flex';
             instructionsTextEl.style.display = 'inline'; 
             playInstructionSoundBtn.style.display = 'inline-block'; 
-            feedbackEl.innerHTML = ''; 
+            feedbackEl.innerHTML = ''; // Pastikan area feedback kosong
             
             // Pastikan musik latar belakang dimulai kembali jika sempat terhenti
             backgroundMusicEl.play().catch(e => {

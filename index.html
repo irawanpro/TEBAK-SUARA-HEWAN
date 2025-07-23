@@ -377,51 +377,6 @@
                 gap: 5px;
             }
         }
-
-        /* CSS Baru untuk Scoreboard dan Overlay */
-        .scoreboard-container {
-            display: none; /* Sembunyikan secara default */
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Overlay gelap */
-            justify-content: center; /* Menggunakan flex untuk centering */
-            align-items: center; /* Menggunakan flex untuk centering */
-            z-index: 20; /* Pastikan di atas semua elemen game */
-        }
-
-        .scoreboard-content {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            transform: scale(0.8);
-            animation: bounceIn 0.8s ease-out forwards;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .scoreboard-content h2 {
-            font-family: 'Fredoka One', cursive;
-            color: #FF6347;
-            font-size: 3em;
-            margin-bottom: 20px;
-        }
-
-        .scoreboard-content p {
-            font-family: 'Fredoka One', cursive;
-            font-size: 2em;
-            color: #4CAF50;
-            margin-bottom: 30px;
-        }
-
-        .scoreboard-content p span {
-            font-size: 1.5em;
-            color: #1E90FF;
-        }
     </style>
 </head>
 <body>
@@ -447,13 +402,6 @@
             <div id="feedback"></div>
         </div>
 
-        <div id="scoreboardScreen" class="scoreboard-container">
-            <div class="scoreboard-content">
-                <h2>Game Selesai!</h2>
-                <p>Skor Akhir Anda: <span id="scoreboardFinalScore">0</span> dari <span id="scoreboardTotalQuestions">0</span></p>
-                <p id="scoreFeedbackText"></p>
-            </div>
-        </div>
         <div id="resultsScreen" class="results-container">
             <h2>🎉 Fakta Menarik tentang Hewan! 🎉</h2>
             <div id="factsContainer">
@@ -471,8 +419,6 @@
     <audio id="factSound"></audio>
     <audio id="clickEffectSound"></audio>
     <audio id="correctAnimalSound"></audio>
-    <audio id="scoreEvaluationSound"></audio>
-
     <script>
         // ====================================================================
         // PANDUAN PEMELIHARAAN KODE
@@ -482,7 +428,7 @@
         const animals = [
             { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", fact: "Singa jantan punya surai lebat yang melindunginya saat berkelahi.", factSound: "assets/audio/fakta_singa.mp3", correctSound: "assets/audio/yabenar_singa.mp3" },
             { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", fact: "Hidung anjing sangat sensitif, bisa mencium bau yang tidak terdeteksi manusia.", factSound: "assets/audio/fakta_anjing.mp3", correctSound: "assets/audio/yabenar_anjing.mp3" },
-            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mpaj", fact: "Kucing bisa tidur 12 sampai 16 jam sehari!", factSound: "assets/audio/fakta_kucing.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" },
+            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", fact: "Kucing bisa tidur 12 sampai 16 jam sehari!", factSound: "assets/audio/fakta_kucing.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" },
             { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", fact: "Gajah adalah hewan darat terbesar dan menggunakan belalainya untuk minum dan makan.", factSound: "assets/audio/fakta_gajah.mp3", correctSound: "assets/audio/yabenar_gajah.mp3" },
             { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", fact: "Kambing bisa memanjat pohon dan tebing curam dengan sangat lincah.", factSound: "assets/audio/fakta_kambing.mp3", correctSound: "assets/audio/yabenar_kambing.mp3" },
             { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", fact: "Sapi punya empat perut dan menghabiskan sebagian besar waktunya mengunyah.", factSound: "assets/audio/fakta_sapi.mp3", correctSound: "assets/audio/yabenar_sapi.mp3" },
@@ -502,9 +448,7 @@
             instruction: "assets/audio/instruksi_tebak_suara.mp3", // Suara instruksi
             correctFeedback: "assets/audio/benar_sekali.mp3",
             wrongFeedback: "assets/audio/coba_lagi.mp3",
-            scoreHigh: "assets/audio/skor_hebat.mp3",
-            scoreMedium: "assets/audio/skor_lumayan.mp3",
-            scoreLow: "assets/audio/skor_perlu_latihan.mp3"
+            // Suara penilaian skor dihapus
         };
 
         // --- 3. PENGATURAN DURASI SUARA DAN JEDA ---
@@ -513,10 +457,8 @@
         // Durasi jeda setelah umpan balik jawaban (benar/salah) dan suara hewan benar selesai, sebelum pindah ke pertanyaan berikutnya (dalam milidetik)
         const DELAY_AFTER_FEEDBACK = 4000; 
         const CLICK_EFFECT_DELAY = 500;
-        // Durasi jeda untuk menampilkan scoreboard (dalam milidetik)
-        // Ini adalah durasi MINIMAL scoreboard akan tampil SETELAH suara penilaian selesai.
-        // Jika suara lebih panjang dari ini, maka akan menunggu suara selesai.
-        const MIN_SCOREBOARD_DISPLAY_DURATION = 2000; 
+        // Durasi jeda untuk papan skor dihilangkan
+        // const MIN_SCOREBOARD_DISPLAY_DURATION = 3000; 
 
         // Variabel Status Game (JANGAN UBAH INI KECUALI ANDA PAHAM BETUL)
         let currentQuestionIndex = 0;
@@ -535,24 +477,20 @@
         const feedbackEl = document.getElementById('feedback');
         const scoreEl = document.getElementById('score');
         const choicesContainerEl = document.getElementById('choicesContainer');
-        // --- Referensi Baru untuk Elemen Instruksi ---
         const instructionsTextEl = document.getElementById('instructionsText'); 
-        const playInstructionSoundBtn = document.getElementById('playInstructionSound'); // Tombol instruksi
-        // --- Akhir Referensi Baru ---
+        const playInstructionSoundBtn = document.getElementById('playInstructionSound'); 
         const questionInfoEl = document.getElementById('questionInfo');
         const gameScreenEl = document.getElementById('gameScreen');
         const resultsScreenEl = document.getElementById('resultsScreen');
-        // Elemen baru untuk scoreboard
-        const scoreboardScreenEl = document.getElementById('scoreboardScreen');
-        const scoreboardFinalScoreEl = document.getElementById('scoreboardFinalScore');
-        const scoreboardTotalQuestionsEl = document.getElementById('scoreboardTotalQuestions');
-        const scoreFeedbackTextEl = document.getElementById('scoreFeedbackText');
-        // Akhir elemen baru untuk scoreboard
+        // Elemen scoreboard dihapus:
+        // const scoreboardScreenEl = document.getElementById('scoreboardScreen');
+        // const scoreboardFinalScoreEl = document.getElementById('scoreboardFinalScore');
+        // const scoreboardTotalQuestionsEl = document.getElementById('scoreboardTotalQuestions');
+        // const scoreFeedbackTextEl = document.getElementById('scoreFeedbackText');
         const factsContainerEl = document.getElementById('factsContainer');
-        // Tambahan referensi untuk elemen audio suara hewan yang benar
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
-        // Referensi audio untuk suara penilaian skor
-        const scoreEvaluationSoundEl = document.getElementById('scoreEvaluationSound');
+        // Audio penilaian skor dihapus:
+        // const scoreEvaluationSoundEl = document.getElementById('scoreEvaluationSound');
 
 
         // Fungsi Utilitas (JANGAN UBAH INI KECUALI ANDA TAHU ALASANNYA)
@@ -566,8 +504,8 @@
 
         function loadNewQuestion() {
             if (currentQuestionIndex >= answeredQuestions.length) {
-                // Semua soal sudah terjawab, tampilkan scoreboard
-                displayScoreboard(); 
+                // Semua soal sudah terjawab, langsung panggil fungsi untuk menampilkan fakta
+                endGame(); 
                 return;
             }
 
@@ -583,7 +521,6 @@
             generateChoices(currentAnimal);
         }
 
-        // --- 4. PEMBUATAN PILIHAN JAWABAN (KOTAK/TOMBOL) SECARA DINAMIS ---
         function generateChoices(correctAnimal) {
             choicesContainerEl.innerHTML = '';
 
@@ -620,7 +557,7 @@
                 setTimeout(() => {
                     gameSoundEl.pause();
                     gameSoundEl.currentTime = 0;
-                }, ANIMAL_SOUND_DURATION); // Menggunakan durasi 2 detik
+                }, ANIMAL_SOUND_DURATION); 
             }, CLICK_EFFECT_DELAY);
         }
 
@@ -638,11 +575,9 @@
                 feedbackEl.textContent = 'Benar! 🎉';
                 feedbackEl.classList.add('correct');
                 
-                // Play the correct animal's sound first
                 correctAnimalSoundEl.src = correctAnimal.correctSound;
                 await correctAnimalSoundEl.play().catch(e => console.error("Error playing correct animal sound:", e));
 
-                // Then play the general correct feedback sound
                 feedbackSoundEl.src = gameSounds.correctFeedback;
                 await feedbackSoundEl.play().catch(e => console.error("Error playing correct feedback sound:", e));
                 
@@ -651,7 +586,6 @@
                 scoreEl.textContent = score;
                 currentQuestionIndex++;
 
-                // Menunggu DELAY_AFTER_FEEDBACK (2 detik) setelah semua suara selesai sebelum memuat pertanyaan baru
                 setTimeout(() => {
                     loadNewQuestion();
                 }, DELAY_AFTER_FEEDBACK); 
@@ -669,69 +603,22 @@
                 });
                 currentQuestionIndex++;
 
-                // Menunggu DELAY_AFTER_FEEDBACK (2 detik) setelah umpan balik salah selesai sebelum memuat pertanyaan baru
                 setTimeout(() => {
                     loadNewQuestion();
                 }, DELAY_AFTER_FEEDBACK);
             }
         }
 
-        // Fungsi untuk menampilkan scoreboard setelah semua soal terjawab
-        async function displayScoreboard() {
+        // Fungsi endGame sekarang langsung menampilkan fakta
+        function endGame() {
             backgroundMusicEl.pause();
             gameScreenEl.style.display = 'none'; // Sembunyikan layar game
-            scoreboardScreenEl.style.display = 'flex'; // Tampilkan scoreboard
-
-            scoreboardFinalScoreEl.textContent = score;
-            scoreboardTotalQuestionsEl.textContent = animals.length;
-
-            let scoreFeedbackSoundPath;
-            let scoreText;
-            if (score === animals.length) {
-                scoreFeedbackSoundPath = gameSounds.scoreHigh;
-                scoreText = `Hebat sekali! Kamu berhasil menjawab semua pertanyaan dengan benar!`;
-            } else if (score >= animals.length / 2) {
-                scoreFeedbackSoundPath = gameSounds.scoreMedium;
-                scoreText = `Kerja bagus! Kamu berhasil menjawab ${score} pertanyaan dengan benar. Terus berlatih ya!`;
-            } else {
-                scoreFeedbackSoundPath = gameSounds.scoreLow;
-                scoreText = `Jangan menyerah! Kamu sudah berusaha, mari kita belajar lagi.`;
-            }
-            scoreFeedbackTextEl.textContent = scoreText; 
-
-            // Putar suara penilaian skor
-            scoreEvaluationSoundEl.src = scoreFeedbackSoundPath;
-            await scoreEvaluationSoundEl.play().catch(e => console.error("Error playing score evaluation sound:", e));
-
-            // Menentukan durasi jeda setelah suara penilaian skor selesai
-            // Pastikan jeda minimal terpenuhi, atau tunggu sampai suara selesai jika lebih panjang
-            const soundDuration = scoreEvaluationSoundEl.duration * 1000; // konversi detik ke milidetik
-            const delayAfterSound = Math.max(MIN_SCOREBOARD_DISPLAY_DURATION, soundDuration);
-
-            // Setelah suara penilaian skor selesai diputar, baru lanjutkan ke endGame
-            scoreEvaluationSoundEl.onended = () => {
-                setTimeout(endGame, MIN_SCOREBOARD_DISPLAY_DURATION); 
-            };
-            // Tambahkan juga timeout jika suara terlalu pendek (untuk memastikan MIN_SCOREBOARD_DISPLAY_DURATION)
-            // Ini penting jika onended tidak dipanggil atau suara sangat singkat
-            if (soundDuration < MIN_SCOREBOARD_DISPLAY_DURATION) {
-                 setTimeout(() => {
-                    if (scoreEvaluationSoundEl.paused) { // Hanya panggil endGame jika sound sudah berhenti
-                        endGame();
-                    }
-                 }, MIN_SCOREBOARD_DISPLAY_DURATION - soundDuration);
-            }
-        }
-
-        // --- 5. LOGIKA AKHIR GAME DAN TAMPILAN FAKTA ---
-        function endGame() {
-            scoreboardScreenEl.style.display = 'none'; // Sembunyikan scoreboard
             resultsScreenEl.style.display = 'block'; // Tampilkan layar fakta
 
             factsContainerEl.innerHTML = '';
             const shuffledFacts = shuffleArray([...animals]);
 
-            for (const animal of shuffledFacts) {
+            shuffledFacts.forEach(animal => {
                 const factItem = document.createElement('div');
                 factItem.classList.add('fact-item');
                 factItem.innerHTML = `
@@ -742,7 +629,7 @@
                     <p>${animal.fact}</p>
                 `;
                 factsContainerEl.appendChild(factItem);
-            }
+            });
 
             const factButtons = document.querySelectorAll('.read-fact-button');
             factButtons.forEach(button => {
@@ -753,6 +640,7 @@
             });
         }
 
+
         function playAgain() {
             score = 0;
             scoreEl.textContent = score;
@@ -760,7 +648,7 @@
             answeredQuestions = shuffleArray([...animals]);
             gameScreenEl.style.display = 'block';
             resultsScreenEl.style.display = 'none';
-            scoreboardScreenEl.style.display = 'none'; // Pastikan scoreboard juga tersembunyi
+            // scoreboardScreenEl.style.display = 'none'; // Dihapus karena scoreboard tidak ada
             
             backgroundMusicEl.play().catch(e => {
                 console.error("Autoplay of background music failed on playAgain:", e);
@@ -779,7 +667,7 @@
             factSoundEl.volume = event.target.value;
             clickEffectSoundEl.volume = event.target.value;
             correctAnimalSoundEl.volume = event.target.value;
-            scoreEvaluationSoundEl.volume = event.target.value; 
+            // scoreEvaluationSoundEl.volume = event.target.value; // Dihapus
         });
 
         // =========================================================
@@ -811,16 +699,12 @@
         }
 
         // --- MENGATUR TOMBOL SUARA INSTRUKSI ---
-        // Fungsi untuk memutar suara instruksi
         function playInstructionSound() {
             gameSoundEl.src = gameSounds.instruction;
             gameSoundEl.play().catch(e => console.error("Error playing instruction sound:", e));
         }
 
-        // Event listener untuk tombol suara instruksi
         playInstructionSoundBtn.addEventListener('click', playInstructionSound);
-        // --- Akhir Pengaturan Tombol Suara Instruksi ---
-
 
         // Inisialisasi game saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {

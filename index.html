@@ -364,6 +364,27 @@
             gap: 10px;
         }
 
+        /* Gaya untuk emoji speaker fakta */
+        .fact-speaker-button {
+            background: none;
+            border: none;
+            font-size: 1.2em; /* Ukuran speaker */
+            cursor: pointer;
+            padding: 0;
+            line-height: 1; /* Pastikan tidak ada spasi ekstra */
+            margin-left: 5px; /* Sedikit jarak dari emoji hewan */
+            transition: transform 0.1s ease-in-out;
+        }
+
+        .fact-speaker-button:hover {
+            transform: scale(1.1);
+        }
+
+        .fact-speaker-button:active {
+            transform: scale(0.9);
+        }
+
+
         .fact-item p {
             font-family: 'Open Sans', sans-serif;
             font-size: 1.1em;
@@ -432,6 +453,9 @@
             .fact-item p {
                 font-size: 1em;
             }
+            .fact-speaker-button {
+                font-size: 1em;
+            }
         }
     </style>
 </head>
@@ -480,27 +504,28 @@
     <audio id="feedbackSound"></audio>
     <audio id="clickEffectSound"></audio>
     <audio id="correctAnimalSound"></audio>
-
-    <script>
+    <audio id="factSoundPlayer"></audio> <script>
         // ====================================================================
         // PANDUAN PEMELIHARAAN KODE
         // ====================================================================
 
         // --- 1. MENAMBAH/MENGUBAH HEWAN (PERTANYAAN) DAN FAKTA MENARIK ---
+        // PENTING: Untuk suara fakta, Anda perlu menyiapkan file .mp3 di folder 'assets/audio/facts/'
+        // Contoh: assets/audio/facts/fakta_singa.mp3, assets/audio/facts/fakta_anjing.mp3, dst.
         const animals = [
-            { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", correctSound: "assets/audio/yabenar_singa.mp3", fact: "Singa adalah satu-satunya kucing besar yang hidup berkelompok, disebut kebanggaan (pride)." },
-            { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", correctSound: "assets/audio/yabenar_anjing.mp3", fact: "Anjing dapat belajar hingga 250 kata dan isyarat, setara dengan anak berusia dua tahun." },
-            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", correctSound: "assets/audio/yabenar_kucing.mp3", fact: "Kucing bisa melompat enam kali tinggi tubuhnya. Mereka juga menghabiskan 70% hidupnya untuk tidur." },
-            { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", correctSound: "assets/audio/yabenar_gajah.mp3", fact: "Gajah adalah hewan darat terbesar dan memiliki ingatan yang luar biasa, bisa mengingat lokasi air bahkan setelah bertahun-tahun." },
-            { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", correctSound: "assets/audio/yabenar_kambing.mp3", fact: "Kambing memiliki pupil mata berbentuk persegi panjang, memberikan mereka penglihatan 320 derajat tanpa perlu menggerakkan kepala." },
-            { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", correctSound: "assets/audio/yabenar_sapi.mp3", fact: "Sapi bisa menghasilkan hingga 12 galon air liur per hari. Mereka juga punya empat perut." },
-            { name: "ayam", emoji: "🐔", sound: "assets/audio/chicken.mp3", correctSound: "assets/audio/yabenar_ayam.mp3", fact: "Ayam adalah keturunan langsung dari dinosaurus. Mereka bahkan punya kerabat hidup yang disebut 'Red Junglefowl'." },
-            { name: "kuda", emoji: "🐎", sound: "assets/audio/horse.mp3", correctSound: "assets/audio/yabenar_kuda.mp3", fact: "Kuda tidak bisa muntah. Ini membuat mereka rentan terhadap kolik yang bisa mengancam jiwa." },
-            { name: "monyet", emoji: "🐒", sound: "assets/audio/monkey.mp3", correctSound: "assets/audio/yabenar_monyet.mp3", fact: "Ada lebih dari 260 spesies monyet yang dikenal. Mereka adalah kerabat dekat manusia." },
-            { name: "burung", emoji: "🐦", sound: "assets/audio/bird.mp3", correctSound: "assets/audio/yabenar_burung.mp3", fact: "Hanya sekitar 10% dari spesies burung di dunia yang bersifat monogami seumur hidup." }
+            { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", correctSound: "assets/audio/yabenar_singa.mp3", fact: "Singa adalah satu-satunya kucing besar yang hidup berkelompok, disebut kebanggaan (pride).", factSound: "assets/audio/facts/fakta_singa.mp3" },
+            { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", correctSound: "assets/audio/yabenar_anjing.mp3", fact: "Anjing dapat belajar hingga 250 kata dan isyarat, setara dengan anak berusia dua tahun.", factSound: "assets/audio/facts/fakta_anjing.mp3" },
+            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", correctSound: "assets/audio/yabenar_kucing.mp3", fact: "Kucing bisa melompat enam kali tinggi tubuhnya. Mereka juga menghabiskan 70% hidupnya untuk tidur.", factSound: "assets/audio/facts/fakta_kucing.mp3" },
+            { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", correctSound: "assets/audio/yabenar_gajah.mp3", fact: "Gajah adalah hewan darat terbesar dan memiliki ingatan yang luar biasa, bisa mengingat lokasi air bahkan setelah bertahun-tahun.", factSound: "assets/audio/facts/fakta_gajah.mp3" },
+            { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", correctSound: "assets/audio/yabenar_kambing.mp3", fact: "Kambing memiliki pupil mata berbentuk persegi panjang, memberikan mereka penglihatan 320 derajat tanpa perlu menggerakkan kepala.", factSound: "assets/audio/facts/fakta_kambing.mp3" },
+            { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", correctSound: "assets/audio/yabenar_sapi.mp3", fact: "Sapi bisa menghasilkan hingga 12 galon air liur per hari. Mereka juga punya empat perut.", factSound: "assets/audio/facts/fakta_sapi.mp3" },
+            { name: "ayam", emoji: "🐔", sound: "assets/audio/chicken.mp3", correctSound: "assets/audio/yabenar_ayam.mp3", fact: "Ayam adalah keturunan langsung dari dinosaurus. Mereka bahkan punya kerabat hidup yang disebut 'Red Junglefowl'.", factSound: "assets/audio/facts/fakta_ayam.mp3" },
+            { name: "kuda", emoji: "🐎", sound: "assets/audio/horse.mp3", correctSound: "assets/audio/yabenar_kuda.mp3", fact: "Kuda tidak bisa muntah. Ini membuat mereka rentan terhadap kolik yang bisa mengancam jiwa.", factSound: "assets/audio/facts/fakta_kuda.mp3" },
+            { name: "monyet", emoji: "🐒", sound: "assets/audio/monkey.mp3", correctSound: "assets/audio/yabenar_monyet.mp3", fact: "Ada lebih dari 260 spesies monyet yang dikenal. Mereka adalah kerabat dekat manusia.", factSound: "assets/audio/facts/fakta_monyet.mp3" },
+            { name: "burung", emoji: "🐦", sound: "assets/audio/bird.mp3", correctSound: "assets/audio/yabenar_burung.mp3", fact: "Hanya sekitar 10% dari spesies burung di dunia yang bersifat monogami seumur hidup.", factSound: "assets/audio/facts/fakta_burung.mp3" }
             // CONTOH UNTUK MENAMBAH HEWAN BARU:
-            // , { name: "bebek", emoji: "🦆", sound: "assets/audio/duck.mp3", correctSound: "assets/audio/yabenar_bebek.mp3", fact: "Bebek memiliki kelenjar uropygeal yang menghasilkan minyak untuk membuat bulu mereka tahan air." }
-            // Pastikan Anda memiliki file: assets/audio/duck.mp3 dan assets/audio/yabenar_bebek.mp3
+            // , { name: "bebek", emoji: "🦆", sound: "assets/audio/duck.mp3", correctSound: "assets/audio/yabenar_bebek.mp3", fact: "Bebek memiliki kelenjar uropygeal yang menghasilkan minyak untuk membuat bulu mereka tahan air.", factSound: "assets/audio/facts/fakta_bebek.mp3" }
+            // Pastikan Anda memiliki file: assets/audio/duck.mp3, assets/audio/yabenar_bebek.mp3, dan assets/audio/facts/fakta_bebek.mp3
         ];
 
         // --- 2. MENGATUR JALUR SUARA GAME UTAMA DAN UMPAN BALIK ---
@@ -510,8 +535,6 @@
             instruction: "assets/audio/instruksi_tebak_suara.mp3", // Suara instruksi
             correctFeedback: "assets/audio/benar_sekali.mp3",
             wrongFeedback: "assets/audio/coba_lagi.mp3",
-            // Tambahkan suara fakta jika ada, atau gunakan suara default jika tidak
-            // factSound: "assets/audio/fact_reveal.mp3" 
         };
 
         // --- 3. PENGATURAN DURASI SUARA DAN JEDA ---
@@ -545,13 +568,13 @@
         const gameOverScreenEl = document.getElementById('gameOverScreen');
         const gameOverTextEl = document.getElementById('gameOverText');
         const finalScoreTextEl = document.getElementById('finalScoreText');
-        const showFactsButton = document.getElementById('showFactsButton'); // Tombol baru
-        const factsScreenEl = document.getElementById('factsScreen'); // Elemen fakta baru
-        const factsContentEl = document.getElementById('factsContent'); // Konten fakta
-        const nextFactButton = document.getElementById('nextFactButton'); // Tombol NEXT
-        const playAgainButton = document.getElementById('playAgainButton'); // Tombol Main Lagi di slide fakta
+        const showFactsButton = document.getElementById('showFactsButton');
+        const factsScreenEl = document.getElementById('factsScreen');
+        const factsContentEl = document.getElementById('factsContent');
+        const nextFactButton = document.getElementById('nextFactButton');
+        const playAgainButton = document.getElementById('playAgainButton');
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
-
+        const factSoundPlayerEl = document.getElementById('factSoundPlayer'); // Audio player baru
 
         // Fungsi Utilitas
         function shuffleArray(array) {
@@ -675,7 +698,8 @@
             finalScoreTextEl.textContent = `Skor kamu ${score} dari ${animals.length} soal`;
             
             // Acak fakta hanya sekali setelah game selesai
-            shuffledFacts = shuffleArray([...animals]); 
+            // Pastikan semua hewan memiliki fakta sebelum diacak
+            shuffledFacts = shuffleArray(animals.filter(animal => animal.fact && animal.factSound)); 
             currentFactPageIndex = 0; // Reset indeks halaman fakta
         }
 
@@ -700,11 +724,24 @@
                 const factDiv = document.createElement('div');
                 factDiv.classList.add('fact-item');
                 factDiv.innerHTML = `
-                    <h3>${i + 1}. ${fact.name.toUpperCase()} <span style="font-size: 0.8em;">(${fact.emoji})</span></h3>
+                    <h3>
+                        ${i + 1}. ${fact.name.toUpperCase()} 
+                        <span style="font-size: 0.8em;">(${fact.emoji})</span>
+                        <button class="fact-speaker-button" data-sound-src="${fact.factSound}">🔊</button>
+                    </h3>
                     <p>${fact.fact}</p>
                 `;
                 factsContentEl.appendChild(factDiv);
             }
+
+            // Tambahkan event listener untuk tombol speaker setelah elemen dimuat
+            factsContentEl.querySelectorAll('.fact-speaker-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const soundSrc = event.target.dataset.soundSrc;
+                    playFactSound(soundSrc);
+                });
+            });
+
 
             // Tentukan visibilitas tombol NEXT dan Main Lagi
             if (endIndex < shuffledFacts.length) {
@@ -746,6 +783,16 @@
             loadNewQuestion();
         }
 
+        function playFactSound(soundSrc) {
+            // Hentikan suara fakta sebelumnya jika sedang berjalan
+            if (!factSoundPlayerEl.paused) {
+                factSoundPlayerEl.pause();
+                factSoundPlayerEl.currentTime = 0;
+            }
+            factSoundPlayerEl.src = soundSrc;
+            factSoundPlayerEl.play().catch(e => console.error("Error playing fact sound:", e));
+        }
+
         // Event listeners
         questionMarkDisplayEl.addEventListener('click', playAnimalSoundWithEffect);
         volumeSliderEl.addEventListener('input', (event) => {
@@ -754,13 +801,12 @@
             feedbackSoundEl.volume = event.target.value;
             clickEffectSoundEl.volume = event.target.value;
             correctAnimalSoundEl.volume = event.target.value;
-            // Jika Anda menambahkan factSound, tambahkan di sini juga
-            // if (gameSounds.factSound) factSoundEl.volume = event.target.value;
+            factSoundPlayerEl.volume = event.target.value; // Atur volume untuk suara fakta
         });
         playInstructionSoundBtn.addEventListener('click', playInstructionSound);
-        showFactsButton.addEventListener('click', showFacts); // Event listener untuk tombol FAKTA MENARIK
-        nextFactButton.addEventListener('click', nextFacts); // Event listener untuk tombol NEXT
-        playAgainButton.addEventListener('click', playAgain); // Event listener untuk tombol Main Lagi (di layar fakta)
+        showFactsButton.addEventListener('click', showFacts);
+        nextFactButton.addEventListener('click', nextFacts);
+        playAgainButton.addEventListener('click', playAgain);
 
 
         // =========================================================

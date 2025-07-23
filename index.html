@@ -268,6 +268,46 @@
             transition: opacity 0.3s ease-in-out;
         }
 
+        /* Gaya untuk pesan GAME SELESAI */
+        .game-over-message {
+            font-family: 'Fredoka One', cursive; /* Menggunakan font Fredoka One */
+            color: #FF6347; /* Warna merah seperti judul utama */
+            font-size: 3.5em; /* Ukuran lebih besar agar menarik */
+            margin-top: 50px; /* Jarak dari atas */
+            margin-bottom: 30px; /* Jarak dari tombol */
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.15); /* Bayangan teks */
+            animation: fadeInScale 1s ease-out forwards; /* Animasi muncul */
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .main-button {
+            background-color: #4CAF50; /* Hijau */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        .main-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+
         /* Responsif */
         @media (max-width: 768px) {
             .game-container {
@@ -296,6 +336,13 @@
                 flex-direction: column;
                 gap: 5px;
             }
+            .game-over-message {
+                font-size: 2.5em; /* Lebih kecil di mobile */
+            }
+            .main-button {
+                font-size: 1.2em; /* Lebih kecil di mobile */
+                padding: 12px 25px;
+            }
         }
     </style>
 </head>
@@ -322,7 +369,12 @@
             <div id="feedback"></div>
         </div>
 
+        <div id="gameOverScreen" style="display: none;">
+            <div class="game-over-message" id="gameOverText">GAME SELESAI</div>
+            <button class="main-button" onclick="playAgain()">Main Lagi!</button>
         </div>
+
+    </div>
 
     <audio id="backgroundMusic" loop></audio>
     <audio id="gameSound"></audio>
@@ -335,11 +387,11 @@
         // PANDUAN PEMELIHARAAN KODE
         // ====================================================================
 
-        // --- 1. MENAMBAH/MENGUBAH HEWAN (PERTANYAAN) ---
+        // --- 1. MENAMBAH/MENGUBAH HEWAN (PERTANYAN) ---
         const animals = [
             { name: "singa", emoji: "🦁", sound: "assets/audio/lion.mp3", correctSound: "assets/audio/yabenar_singa.mp3" },
             { name: "anjing", emoji: "🐶", sound: "assets/audio/dog.mp3", correctSound: "assets/audio/yabenar_anjing.mp3" },
-            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp3", correctSound: "assets/audio/yabenar_kucing.mp3" },
+            { name: "kucing", emoji: "🐱", sound: "assets/audio/cat.mp2", correctSound: "assets/audio/yabenar_kucing.mp3" }, // <-- Perhatikan: cat.mp2? Harusnya .mp3
             { name: "gajah", emoji: "🐘", sound: "assets/audio/elephant.mp3", correctSound: "assets/audio/yabenar_gajah.mp3" },
             { name: "kambing", emoji: "🐐", sound: "assets/audio/goat.mp3", correctSound: "assets/audio/yabenar_kambing.mp3" },
             { name: "sapi", emoji: "🐄", sound: "assets/audio/cow.mp3", correctSound: "assets/audio/yabenar_sapi.mp3" },
@@ -386,7 +438,8 @@
         const playInstructionSoundBtn = document.getElementById('playInstructionSound'); 
         const questionInfoEl = document.getElementById('questionInfo');
         const gameScreenEl = document.getElementById('gameScreen');
-        // resultsScreenEl dan fakta terkait dihapus
+        const gameOverScreenEl = document.getElementById('gameOverScreen'); // Elemen baru
+        const gameOverTextEl = document.getElementById('gameOverText'); // Elemen baru
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
 
 
@@ -401,10 +454,7 @@
 
         function loadNewQuestion() {
             if (currentQuestionIndex >= answeredQuestions.length) {
-                // Semua soal sudah terjawab
-                // Jika tidak ada layar lain setelah game selesai,
-                // Anda bisa menambahkan pesan "Game Selesai!" atau tombol "Main Lagi" di sini
-                displayGameCompleted(); // Panggil fungsi baru untuk menangani akhir game
+                displayGameCompleted();
                 return;
             }
 
@@ -507,46 +557,32 @@
             }
         }
 
-        // Fungsi baru untuk menangani akhir game (tanpa fakta menarik)
         function displayGameCompleted() {
-            backgroundMusicEl.pause();
-            feedbackEl.textContent = `Game Selesai! Skor akhir Anda: ${score} dari ${animals.length}.`;
-            feedbackEl.classList.add('correct'); // Bisa disesuaikan warnanya
-            // Anda bisa tambahkan tombol "Main Lagi" di sini
+            gameScreenEl.style.display = 'none'; // Sembunyikan layar game
+            gameOverScreenEl.style.display = 'block'; // Tampilkan layar game over baru
             
-            // Opsional: Sembunyikan tombol pilihan agar tidak bisa diklik lagi
-            choicesContainerEl.style.display = 'none';
-            questionMarkDisplayEl.style.display = 'none';
-            instructionsTextEl.style.display = 'none';
-            playInstructionSoundBtn.style.display = 'none';
-
-            // Atau, tampilkan tombol "Main Lagi"
-            const playAgainButton = document.createElement('button');
-            playAgainButton.textContent = "Main Lagi!";
-            playAgainButton.classList.add('main-button'); // Tambahkan kelas CSS yang sesuai jika ada
-            playAgainButton.onclick = playAgain;
-            feedbackEl.appendChild(playAgainButton); // Tambahkan tombol di bawah feedback
-            
-            // Atau, Anda bisa membuat div khusus untuk pesan akhir game
-            // dan menampilkannya di sini, lalu sembunyikan gameScreen.
-            // Untuk saat ini, saya hanya akan memodifikasi gameScreen.
+            // Musik latar belakang akan tetap berjalan karena kita tidak mempause-nya di sini
+            // backgroundMusicEl.play() // Tidak perlu dipanggil, karena sudah loop dan tidak dipause
         }
-
 
         function playAgain() {
             score = 0;
             scoreEl.textContent = score;
             currentQuestionIndex = 0;
             answeredQuestions = shuffleArray([...animals]);
-            gameScreenEl.style.display = 'block'; // Pastikan layar game utama terlihat
             
-            // Reset tampilan elemen yang mungkin disembunyikan di displayGameCompleted
-            choicesContainerEl.style.display = 'grid'; // Kembalikan ke grid
-            questionMarkDisplayEl.style.display = 'flex'; // Kembalikan ke flex
-            instructionsTextEl.style.display = 'inline'; // Atau block, sesuai kebutuhan
-            playInstructionSoundBtn.style.display = 'inline-block'; // Atau flex, sesuai kebutuhan
-            feedbackEl.innerHTML = ''; // Hapus pesan "Game Selesai" dan tombol
+            // Sembunyikan layar game over dan tampilkan kembali layar game utama
+            gameOverScreenEl.style.display = 'none';
+            gameScreenEl.style.display = 'block'; 
             
+            // Reset tampilan elemen yang mungkin disembunyikan sebelumnya
+            choicesContainerEl.style.display = 'grid';
+            questionMarkDisplayEl.style.display = 'flex';
+            instructionsTextEl.style.display = 'inline'; 
+            playInstructionSoundBtn.style.display = 'inline-block'; 
+            feedbackEl.innerHTML = ''; 
+            
+            // Pastikan musik latar belakang dimulai kembali jika sempat terhenti
             backgroundMusicEl.play().catch(e => {
                 console.error("Autoplay of background music failed on playAgain:", e);
             });
@@ -561,7 +597,6 @@
             backgroundMusicEl.volume = event.target.value;
             gameSoundEl.volume = event.target.value;
             feedbackSoundEl.volume = event.target.value;
-            // factSoundEl dihapus
             clickEffectSoundEl.volume = event.target.value;
             correctAnimalSoundEl.volume = event.target.value;
         });

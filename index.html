@@ -890,9 +890,33 @@
             answeredQuestions = shuffleArray([...animals]); 
             loadNewQuestion();
         });
-    </script>
+    
+// --- Tambahan Kontrol Credit ---
+const creditTextEl = document.getElementById('creditText');
 
-    <div class="watermark">
+// Simpan referensi asli
+const original_displayGameCompleted = displayGameCompleted;
+displayGameCompleted = function() {
+    original_displayGameCompleted.apply(this, arguments);
+    creditTextEl.style.display = 'block';
+};
+
+const original_showFacts = showFacts;
+showFacts = function() {
+    original_showFacts.apply(this, arguments);
+    creditTextEl.style.display = 'block';
+};
+
+const original_playAgain = playAgain;
+playAgain = function() {
+    original_playAgain.apply(this, arguments);
+    creditTextEl.style.display = 'none';
+};
+// --- Akhir Tambahan Kontrol Credit ---
+
+</script>
+
+    <div class="watermark" id="creditText" style="display:none;">
         Created on : Mamanya fatih dan rafasya<br>
         Contac person : email
     </div>

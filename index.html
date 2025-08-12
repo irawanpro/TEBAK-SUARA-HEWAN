@@ -477,6 +477,26 @@
         }
         /* --- Akhir Tambahan CSS --- */
 
+    /* Credit Tengah Bawah */
+    .watermark {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 14px;
+        color: #fff;
+        text-shadow: 
+            1px 1px 2px rgba(0,0,0,0.9),
+            0 0 5px rgba(0,0,0,0.8),
+            -1px -1px 2px rgba(255,255,255,0.2);
+        font-weight: bold;
+        z-index: 9999;
+        pointer-events: none;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+
     </style>
 </head>
 <body>
@@ -715,18 +735,11 @@
         }
 
         function displayGameCompleted() {
-    gameScreenEl.style.display = 'none'; // Sembunyikan layar game
-    gameOverScreenEl.style.display = 'block'; // Tampilkan layar game over baru
-    
-    // Set teks skor akhir
-    finalScoreTextEl.textContent = `Skor kamu ${score} dari ${animals.length} soal`;
-    
-    // Acak fakta hanya sekali setelah game selesai
-    shuffledFacts = shuffleArray(animals.filter(animal => animal.fact && animal.factSound)); 
-    currentFactPageIndex = 0; // Reset indeks halaman fakta
-    
-    creditTextEl.style.display = 'block'; // tampilkan credit
-} dari ${animals.length} soal`;
+            gameScreenEl.style.display = 'none'; // Sembunyikan layar game
+            gameOverScreenEl.style.display = 'block'; // Tampilkan layar game over baru
+            
+            // Set teks skor akhir
+            finalScoreTextEl.textContent = `Skor kamu ${score} dari ${animals.length} soal`;
             
             // Acak fakta hanya sekali setelah game selesai
             // Pastikan semua hewan memiliki fakta sebelum diacak
@@ -735,15 +748,14 @@
         }
 
         function showFacts() {
-    gameOverScreenEl.style.display = 'none'; // Sembunyikan layar game over
-    factsScreenEl.style.display = 'block'; // Tampilkan layar fakta
-    
-    // Pastikan musik latar tetap berjalan
-    backgroundMusicEl.play().catch(e => console.error("Failed to play background music on facts screen:", e));
+            gameOverScreenEl.style.display = 'none'; // Sembunyikan layar game over
+            factsScreenEl.style.display = 'block'; // Tampilkan layar fakta
+            
+            // Pastikan musik latar tetap berjalan
+            backgroundMusicEl.play().catch(e => console.error("Failed to play background music on facts screen:", e));
 
-    loadFactsPage(); // Muat fakta pertama
-    creditTextEl.style.display = 'block'; // tampilkan credit
-}
+            loadFactsPage(); // Muat fakta pertama
+        }
 
         function loadFactsPage() {
             factsContentEl.innerHTML = ''; // Kosongkan konten fakta sebelumnya
@@ -809,26 +821,24 @@
         }
 
         function playAgain() {
-    factsScreenEl.style.display = 'none';
-    score = 0;
-    scoreEl.textContent = score;
-    currentQuestionIndex = 0;
-    answeredQuestions = shuffleArray([...animals]);
-    gameScreenEl.style.display = 'block'; 
-    
-    // Reset tampilan elemen game
-    choicesContainerEl.style.display = 'grid';
-    questionMarkDisplayEl.style.display = 'flex';
-    instructionsTextEl.style.display = 'inline'; 
-    playInstructionSoundBtn.style.display = 'inline-block'; 
-    feedbackEl.innerHTML = ''; 
-    
-    backgroundMusicEl.play().catch(e => {
-        console.error("Autoplay of background music failed on playAgain:", e);
-    });
-    loadNewQuestion();
-    creditTextEl.style.display = 'none'; // sembunyikan credit saat main
-});
+            // Sembunyikan layar fakta dan reset game
+            factsScreenEl.style.display = 'none';
+            score = 0;
+            scoreEl.textContent = score;
+            currentQuestionIndex = 0;
+            answeredQuestions = shuffleArray([...animals]);
+            gameScreenEl.style.display = 'block'; 
+            
+            // Reset tampilan elemen game
+            choicesContainerEl.style.display = 'grid';
+            questionMarkDisplayEl.style.display = 'flex';
+            instructionsTextEl.style.display = 'inline'; 
+            playInstructionSoundBtn.style.display = 'inline-block'; 
+            feedbackEl.innerHTML = ''; 
+            
+            backgroundMusicEl.play().catch(e => {
+                console.error("Autoplay of background music failed on playAgain:", e);
+            });
             loadNewQuestion();
         }
 
@@ -900,7 +910,31 @@
             answeredQuestions = shuffleArray([...animals]); 
             loadNewQuestion();
         });
-    </script>
+    
+// --- Tambahan Kontrol Credit ---
+const creditTextEl = document.getElementById('creditText');
+
+// Simpan referensi asli
+const original_displayGameCompleted = displayGameCompleted;
+displayGameCompleted = function() {
+    original_displayGameCompleted.apply(this, arguments);
+    creditTextEl.style.display = 'block';
+};
+
+const original_showFacts = showFacts;
+showFacts = function() {
+    original_showFacts.apply(this, arguments);
+    creditTextEl.style.display = 'block';
+};
+
+const original_playAgain = playAgain;
+playAgain = function() {
+    original_playAgain.apply(this, arguments);
+    creditTextEl.style.display = 'none';
+};
+// --- Akhir Tambahan Kontrol Credit ---
+
+</script>
 
     <div class="watermark" id="creditText" style="display:none;">
         Created on : Mamanya fatih dan rafasya<br>

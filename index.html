@@ -407,6 +407,31 @@
             min-width: 150px; /* Lebar minimum agar konsisten */
         }
 
+        /* --- Gaya untuk Watermark Kredit --- */
+        .credit-watermark {
+            display: none; /* Sembunyikan secara default */
+            position: fixed; /* Posisinya tetap di layar */
+            bottom: 10px; /* Jarak dari bawah */
+            left: 50%;
+            transform: translateX(-50%); /* Rata tengah horizontal */
+            text-align: center;
+            font-family: 'Open Sans', sans-serif; /* Font yang jelas dan mudah dibaca */
+            color: rgba(0, 0, 0, 0.5); /* Warna abu-abu transparan */
+            font-size: 0.9em; /* Ukuran font tidak terlalu besar */
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5); /* Bayangan teks untuk membuatnya lebih menonjol */
+            z-index: 1000; /* Pastikan di atas elemen lain */
+        }
+
+        .credit-watermark .contact-link {
+            color: rgba(0, 0, 0, 0.5);
+            text-decoration: none; /* Hilangkan garis bawah */
+            transition: color 0.3s ease;
+        }
+
+        .credit-watermark .contact-link:hover {
+            color: rgba(0, 0, 0, 0.8); /* Warna lebih jelas saat di-hover */
+        }
+
 
         /* Responsif */
         @media (max-width: 768px) {
@@ -459,43 +484,6 @@
                 font-size: 1em;
             }
         }
-    
-        /* --- Tambahan CSS Watermark Timbul --- */
-        .watermark {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            font-size: 12px;
-            color: #fff;
-            text-shadow: 
-                1px 1px 2px rgba(0,0,0,0.9),
-                0 0 5px rgba(0,0,0,0.8),
-                -1px -1px 2px rgba(255,255,255,0.2);
-            font-weight: bold;
-            z-index: 9999;
-            pointer-events: none;
-        }
-        /* --- Akhir Tambahan CSS --- */
-
-    /* Credit Tengah Bawah */
-    .watermark {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 14px;
-        color: #fff;
-        text-shadow: 
-            1px 1px 2px rgba(0,0,0,0.9),
-            0 0 5px rgba(0,0,0,0.8),
-            -1px -1px 2px rgba(255,255,255,0.2);
-        font-weight: bold;
-        z-index: 9999;
-        pointer-events: none;
-        text-align: center;
-        line-height: 1.4;
-    }
-
 
     </style>
 </head>
@@ -537,7 +525,11 @@
                 <button class="main-button" id="playAgainButton" style="display: none;">Main Lagi!</button>
             </div>
         </div>
-
+    </div>
+    
+    <div id="creditWatermark" class="credit-watermark">
+        <p>Created on: Mamanya fatih dan rafasya<br>
+        Contact person: <a href="mailto:email" class="contact-link">email</a></p>
     </div>
 
     <audio id="backgroundMusic" loop></audio>
@@ -619,6 +611,9 @@
         const playAgainButton = document.getElementById('playAgainButton');
         const correctAnimalSoundEl = document.getElementById('correctAnimalSound');
         const factSoundPlayerEl = document.getElementById('factSoundPlayer');
+        // Referensi elemen watermark baru
+        const creditWatermarkEl = document.getElementById('creditWatermark');
+
 
         // Fungsi Utilitas
         function shuffleArray(array) {
@@ -745,6 +740,9 @@
             // Pastikan semua hewan memiliki fakta sebelum diacak
             shuffledFacts = shuffleArray(animals.filter(animal => animal.fact && animal.factSound)); 
             currentFactPageIndex = 0; // Reset indeks halaman fakta
+            
+            // Tampilkan watermark
+            creditWatermarkEl.style.display = 'block';
         }
 
         function showFacts() {
@@ -839,6 +837,10 @@
             backgroundMusicEl.play().catch(e => {
                 console.error("Autoplay of background music failed on playAgain:", e);
             });
+            
+            // Sembunyikan watermark
+            creditWatermarkEl.style.display = 'none';
+            
             loadNewQuestion();
         }
 
@@ -910,36 +912,8 @@
             answeredQuestions = shuffleArray([...animals]); 
             loadNewQuestion();
         });
-    
-// --- Tambahan Kontrol Credit ---
-const creditTextEl = document.getElementById('creditText');
-
-// Simpan referensi asli
-const original_displayGameCompleted = displayGameCompleted;
-displayGameCompleted = function() {
-    original_displayGameCompleted.apply(this, arguments);
-    creditTextEl.style.display = 'block';
-};
-
-const original_showFacts = showFacts;
-showFacts = function() {
-    original_showFacts.apply(this, arguments);
-    creditTextEl.style.display = 'block';
-};
-
-const original_playAgain = playAgain;
-playAgain = function() {
-    original_playAgain.apply(this, arguments);
-    creditTextEl.style.display = 'none';
-};
-// --- Akhir Tambahan Kontrol Credit ---
 
 </script>
-
-    <div class="watermark" id="creditText" style="display:none;">
-        Created on : Mamanya fatih dan rafasya<br>
-        Contac person : email
-    </div>
 
 </body>
 </html>

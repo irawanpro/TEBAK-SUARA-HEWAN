@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>Tebak Suara Hewan!</title>
     <style>
         /* Desain Umum dan Font */
@@ -10,17 +10,24 @@
 
         body {
             font-family: 'Open Sans', sans-serif;
-            /* Perubahan utama untuk menempatkan konten di tengah */
-            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* --- */
+            min-height: 100vh;
             margin: 0;
             background: url('assets/audio/background.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #333;
             overflow-x: hidden;
+            
+            /* Penyesuaian khusus untuk zoom-out di Android */
+            transform: scale(0.67);
+            transform-origin: top left;
+            width: 149.25%; /* Perhitungan: 100 / 0.67 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0;
         }
 
         .game-container {

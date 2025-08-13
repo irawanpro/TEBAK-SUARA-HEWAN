@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -18,16 +19,13 @@
             background: url('assets/audio/background.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #333;
-            overflow-x: hidden;
+            overflow: hidden; /* Mencegah scrolling pada body */
             
-            /* Penyesuaian khusus untuk zoom-out di Android */
-            transform: scale(0.67);
-            transform-origin: top left;
-            width: 149.25%; /* Perhitungan: 100 / 0.67 */
-            position: absolute;
-            top: 0;
-            left: 0;
-            padding: 0;
+            /* Penyesuaian baru untuk responsif */
+            width: 100vw;
+            height: 100vh;
+            box-sizing: border-box;
+            position: relative;
         }
 
         .game-container {
@@ -44,6 +42,13 @@
             overflow: hidden;
             border: 5px solid #FF6347;
             box-sizing: border-box;
+            
+            /* Penyesuaian baru untuk responsif */
+            max-height: 95vh;
+            overflow-y: auto; /* Memungkinkan scrolling internal jika konten terlalu panjang */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         @keyframes bounceIn {
@@ -478,6 +483,12 @@
                 width: 50px;
                 height: 50px;
                 font-size: 1.8em;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                transform: scale(1);
+                width: 100%;
             }
         }
     </style>

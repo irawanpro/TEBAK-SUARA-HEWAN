@@ -1,6 +1,53 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watermark TRIAL</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  /* Watermark teks */
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 80px;
+    font-weight: bold;
+    color: #000;
+    opacity: 0.08; /* tingkat samar */
+    white-space: nowrap;
+    pointer-events: none; /* tidak ganggu klik */
+    user-select: none;    /* tidak bisa di-select */
+  }
+
+  /* Konten halaman */
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    font-family: sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark">TRIAL</div>
+  
+</div>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tebak Suara Hewan!</title>

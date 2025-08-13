@@ -1,9 +1,9 @@
- 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tebak Suara Hewan!</title>
     <style>
         /* Desain Umum dan Font */
@@ -11,24 +11,17 @@
 
         body {
             font-family: 'Open Sans', sans-serif;
+            /* Perubahan utama untuk menempatkan konten di tengah */
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            /* --- */
             margin: 0;
             background: url('assets/audio/background.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #333;
             overflow-x: hidden;
-            
-            /* Penyesuaian khusus untuk zoom-out di Android */
-            transform: scale(0.65);
-            transform-origin: top left;
-            width: 153.846%; 
-            position: absolute;
-            top: 0;
-            left: 0;
-            padding: 0;
         }
 
         .game-container {
@@ -897,3 +890,9 @@
 </body>
 </html>
 
+ 
+ * height: 100vh;: Properti ini memastikan elemen body memiliki tinggi penuh dari viewport (layar) yang tersedia.
+ * display: flex;: Ini mengubah elemen body menjadi kontainer fleksibel, memungkinkan properti Flexbox diterapkan pada elemen di dalamnya.
+ * justify-content: center;: Properti ini memusatkan konten (dalam hal ini, .game-container) secara horizontal di dalam body.
+ * align-items: center;: Properti ini memusatkan konten (.game-container) secara vertikal di dalam body.
+Dengan menggabungkan keempat properti ini, Anda secara efektif menempatkan kontainer game Anda tepat di tengah-tengah layar, baik secara horizontal maupun vertikal, di semua ukuran perangkat.
